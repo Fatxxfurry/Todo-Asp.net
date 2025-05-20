@@ -5,14 +5,14 @@ namespace MyApi.Service
 {
     public interface ITodoService
     {
-        Task<Todo> CreateTodoAsync(Todo todo);
-        Task<Todo> GetTodoByIdAsync(int id);
-        Task<List<Todo>> GetAllTodosAsync();
-        Task<Todo> UpdateTodoAsync(Todo todo);
+        Task<TodoDto> CreateTodoAsync(TodoDto todoDto);
+        Task<TodoDto> GetTodoByIdAsync(int id);
+        Task<List<TodoDto>> GetAllTodosAsync();
+        Task<TodoDto> UpdateTodoAsync(TodoDto todoDto);
         Task DeleteTodoByIdAsync(int id);
-        Task<List<Todo>> GetTodosByUserIdAsync(int userId);
-        Task<List<Todo>> GetTodosByCategoryIdAsync(int categoryId);
-        Task<List<Todo>> GetTodosByTagIdAsync(int tagId);
-        Task<List<Todo>> FilterTodosAsync(TodosFilterDto filterDto);
+        Task<List<TodoDto>> GetTodosByUserIdAsync(int userId);
+        Task<List<TodoDto>> GetTodosByCategoryIdAsync(int categoryId);
+        Task<List<TodoDto>> GetTodosByTagIdAsync(int tagId);
+        Task<List<TodoDto>> FilterTodosAsync(TodosFilterDto filterDto);
     }
 }

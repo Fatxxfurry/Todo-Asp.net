@@ -1,13 +1,13 @@
-using MyApi.Models;
+using MyApi.Dto;
 namespace MyApi.Service
 {
     public interface ICategoryService
     {
-        Task<List<Category>> GetAllCategoriesAsync(int userId);
-        Task<Category> GetCategoryByIdAsync(int id);
-        Task<Category> CreateCategoryAsync(Category category);
-        Task<Category> UpdateCategoryAsync(Category category);
+        Task<List<CategoryDto>> GetAllCategoriesAsync(int userId);
+        Task<CategoryDto> GetCategoryByIdAsync(int id);
+        Task<CategoryDto> CreateCategoryAsync(CategoryDto categoryDto);
+        Task<CategoryDto> UpdateCategoryAsync(CategoryDto categoryDto);
         Task DeleteCategoryAsync(int id);
-        Task<List<Category>> GetCategoriesByUserIdAsync(int userId);
+        Task<List<CategoryDto>> GetCategoriesByUserIdAsync(int userId);
     }
 }

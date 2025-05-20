@@ -1,14 +1,15 @@
 using MyApi.Models;
+using MyApi.Dto;
 namespace MyApi.Service
 {
     public interface IUserService
     {
-        Task<User> RegisterAsync(User user);
-        Task<User> LoginAsync(string email, string password);
-        Task<User> GetByEmailAsync(string email);
-        Task<List<User>> GetAllUsersAsync();
-        Task<User> GetUserByIdAsyncAsync(int id);
-        Task<User> UpdateUserAsync(User user);
-        Task<User> DeleteUserAsync(int id);
+        Task<UserDto> RegisterAsync(User user);
+        Task<UserDto> LoginAsync(string email, string password);
+        Task<UserDto> GetByEmailAsync(string email);
+        Task<List<UserDto>> GetAllUsersAsync();
+        Task<UserDto> GetUserByIdAsyncAsync(int id);
+        Task<UserDto> UpdateUserAsync(UserDto userDto);
+        Task<UserDto> DeleteUserAsync(int id);
     }
 }

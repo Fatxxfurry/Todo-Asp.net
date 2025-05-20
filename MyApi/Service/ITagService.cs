@@ -1,12 +1,13 @@
 using MyApi.Models;
+using MyApi.Dto;
 namespace MyApi.Service
 {
     public interface ITagService
     {
-        Task<Tag> CreateTagAsync(Tag tag);
-        Task<Tag> GetTagByIdAsync(int id);
-        Task<List<Tag>> GetAllTagsAsync();
-        Task<Tag> UpdateTagAsync(Tag tag);
+        Task<TagDto> CreateTagAsync(TagDto tagDto);
+        Task<TagDto> GetTagByIdAsync(int id);
+        Task<List<TagDto>> GetAllTagsAsync();
+        Task<TagDto> UpdateTagAsync(TagDto tagDto);
         Task DeleteTagAsync(int id);
     }
 }
