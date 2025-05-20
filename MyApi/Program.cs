@@ -9,14 +9,16 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 
 var app = builder.Build();
-app.UseMiddleware<ExceptionHandlingMiddleware>();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-
+app.UseMiddleware<ExceptionMiddleware>();
+app.UseRouting();
+app.MapControllers();
 app.UseHttpsRedirection();
 
 app.Run();
