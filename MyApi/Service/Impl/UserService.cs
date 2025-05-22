@@ -2,6 +2,7 @@ using MyApi.Models;
 using MyApi.Dto;
 using MyApi.Repositories;
 using AutoMapper;
+using MyApi.Exceptions;
 namespace MyApi.Service.Impl
 {
     public class UserService : IUserService
@@ -25,13 +26,21 @@ namespace MyApi.Service.Impl
         public async Task<UserDto> RegisterAsync(User user)
         {
             var createdUser = await _userRepository.CreateUserAsync(user);
+            if (createdUser == null)
+            {
+                throw new InvalidOperationException("User registration failed.");
+            }
             return _mapper.Map<UserDto>(createdUser);
         }
 
         public async Task<UserDto> GetByEmailAsync(string email)
         {
             var user = await _userRepository.GetByEmailAsync(email);
-            return user == null ? null : _mapper.Map<UserDto>(user);
+            if (user == null)
+            {
+                throw new NotFoundException("User not found.");
+            }
+            return _mapper.Map<UserDto>(user);
         }
 
         public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
@@ -43,7 +52,11 @@ namespace MyApi.Service.Impl
         public async Task<UserDto> GetUserByIdAsync(int id)
         {
             var user = await _userRepository.GetByIdAsync(id);
-            return user == null ? null : _mapper.Map<UserDto>(user);
+            if (user == null)
+            {
+                throw new NotFoundException("User not found.");
+            }
+            return _mapper.Map<UserDto>(user);
         }
 
         public async Task<UserDto> UpdateUserAsync(UserDto userDto)
@@ -58,7 +71,7 @@ namespace MyApi.Service.Impl
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null)
             {
-                return null;
+                throw new NotFoundException("User not found.");
             }
             await _userRepository.DeleteUserAsync(id);
             return _mapper.Map<UserDto>(user);

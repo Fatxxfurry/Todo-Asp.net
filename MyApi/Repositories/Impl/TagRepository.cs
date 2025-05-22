@@ -2,7 +2,7 @@ using MyApi.Models;
 using Microsoft.EntityFrameworkCore;
 namespace MyApi.Repositories
 {
-        public class TagRepository : ITagRepository
+    public class TagRepository : ITagRepository
     {
         private readonly AppDbContext _context;
 
@@ -44,6 +44,10 @@ namespace MyApi.Repositories
 
             _context.Tags.Remove(tag);
             await _context.SaveChangesAsync();
+        }
+        public async Task<List<Tag>> GetByUserIdAsync(int userId)
+        {
+            return await _context.Tags.Where(t => t.userId == userId).ToListAsync();
         }
     }
 }

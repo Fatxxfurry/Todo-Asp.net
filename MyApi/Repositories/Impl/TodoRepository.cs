@@ -44,4 +44,25 @@ public class TodoRepository : ITodoRepository
         _context.Todos.Remove(todo);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<List<Todo>> GetByUserIdAsync(int userId)
+    {
+        return await _context.Todos.Where(t => t.userId == userId).ToListAsync();
+    }
+
+    public async Task<List<Todo>> GetByCategoryIdAsync(int categoryId)
+    {
+        return await _context.Todos.Where(t => t.categoryId == categoryId).ToListAsync();
+    }
+
+    public async Task<List<Todo>> GetByTagIdAsync(int tagId)
+    {
+        return await _context.Todos.Where(t => t.tagId == tagId).ToListAsync();
+    }
+
+    public async Task<List<Todo>> FilterAsync()
+    {
+        return await _context.Todos.Where(t => t.userId == filterDto.userId && t.categoryId == filterDto.categoryId && t.tagId == filterDto.tagId).ToListAsync();
+    }
+
 }

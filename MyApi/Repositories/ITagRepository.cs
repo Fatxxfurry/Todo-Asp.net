@@ -8,5 +8,6 @@ namespace MyApi.Repositories
         Task<Tag> CreateAsync(Tag tag);
         Task<Tag> UpdateAsync(Tag tag);
         Task DeleteAsync(int id);
+        Task<List<Tag>> GetByUserIdAsync(int userId); 
     }
 }

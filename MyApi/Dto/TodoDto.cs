@@ -10,7 +10,7 @@ namespace MyApi.Dto
         public Priority? priority { get; set; }
         public TodoStatus? status { get; set; }
         public int? categoryId { get; set; }
-        public List<string?>? tags { get; set; } = new List<string?>();
+        public List<string?>? tagNames { get; set; } = new List<string?>();
         public int? userId { get; set; }
         public DateTime? dueDate { get; set; }
         public DateTime? createdAt { get; set; }

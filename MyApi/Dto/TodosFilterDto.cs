@@ -12,6 +12,6 @@ namespace MyApi.Dto
         public DateTime? dueDate { get; set; }
         public DateTime? createdAt { get; set; }
         public DateTime? updatedAt { get; set; }
-        public List<string> tag { get; set; } = new List<string>();
+        public List<string> tagNames { get; set; } = new List<string>();
     }
 }

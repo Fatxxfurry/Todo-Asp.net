@@ -1,4 +1,5 @@
 using MyApi.Models;
+using MyApi.Dto;
 namespace MyApi.Repositories
 {
     public interface ITodoRepository
@@ -8,5 +9,9 @@ namespace MyApi.Repositories
         Task<Todo> CreateAsync(Todo todo);
         Task<Todo> UpdateAsync(Todo todo);
         Task DeleteAsync(int id);
+        Task<List<Todo>> GetByUserIdAsync(int userId);
+        Task<List<Todo>> GetByCategoryIdAsync(int categoryId);
+        Task<List<Todo>> GetByTagsAsync(List<Tag> tags);
+        Task<IEnumerable<Todo>> FilterAsync(TodosFilterDto filterDto);
     }
 }

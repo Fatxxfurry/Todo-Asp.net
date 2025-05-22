@@ -9,5 +9,6 @@ namespace MyApi.Service
         Task<List<TagDto>> GetAllTagsAsync();
         Task<TagDto> UpdateTagAsync(TagDto tagDto);
         Task DeleteTagAsync(int id);
+        Task<List<TagDto>> GetTagsByUserIdAsync(int userId);
     }
 }
