@@ -105,11 +105,11 @@ namespace MyApi.Service.Impl
             return todos.Select(todo => _mapper.Map<TodoDto>(todo)).ToList();
         }
 
-        // public async Task<List<TodoDto>> GetTodosByTagIdAsync(int tagId)
-        // {
-        //     var todos = await _repository.GetByTagIdAsync(tagId);
-        //     return todos.Select(todo => _mapper.Map<TodoDto>(todo)).ToList();
-        // }
+        public async Task<List<TodoDto>> GetTodosByTagsAsync(List<TagDto> tags)
+        {
+            var todos = await _repository.GetByTagsAsync(tags.Select(tag => _mapper.Map<Tag>(tag)).ToList());
+            return todos.Select(todo => _mapper.Map<TodoDto>(todo)).ToList();
+        }
 
         public async Task<List<TodoDto>> FilterTodosAsync(TodosFilterDto filterDto)
         {

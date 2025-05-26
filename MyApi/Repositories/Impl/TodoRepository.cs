@@ -1,6 +1,7 @@
 using MyApi.Models;
 using Microsoft.EntityFrameworkCore;
 using MyApi.Repositories;
+using MyApi.Dto;
 public class TodoRepository : ITodoRepository
 {
     private readonly AppDbContext _context;
@@ -55,14 +56,59 @@ public class TodoRepository : ITodoRepository
         return await _context.Todos.Where(t => t.categoryId == categoryId).ToListAsync();
     }
 
-    public async Task<List<Todo>> GetByTagIdAsync(int tagId)
+    public async Task<Todo> AddTagAsync(Todo todo, Tag tag)
     {
-        return await _context.Todos.Where(t => t.tagId == tagId).ToListAsync();
-    }
+        if (todo.tags.Any(t => t.id == tag.id))
+            return todo;
 
-    public async Task<List<Todo>> FilterAsync()
+        todo.tags.Add(tag);
+        await _context.SaveChangesAsync();
+        return todo;
+    }
+    public async Task<List<Todo>> GetByTagsAsync(List<Tag> tags)
     {
-        return await _context.Todos.Where(t => t.userId == filterDto.userId && t.categoryId == filterDto.categoryId && t.tagId == filterDto.tagId).ToListAsync();
+        return await _context.Todos
+            .Where(t => tags.All(tag => t.tags.Any(tt => tt.id == tag.id)))
+            .ToListAsync();
+    }
+    public async Task DeleteTagAsync(Todo todo, Tag tag)
+    {
+        if (!todo.tags.Any(t => t.id == tag.id))
+            return;
+
+        todo.tags.Remove(tag);
+        await _context.SaveChangesAsync();
+    }
+    public async Task<List<Todo>> FilterAsync(TodosFilterDto filterDto)
+    {
+        var todos = await _context.Todos.ToListAsync();
+        var filteredTodos = todos;
+        if (filterDto.categoryId.HasValue)
+            filteredTodos = filteredTodos.Where(t => t.categoryId == filterDto.categoryId).ToList();
+        if (filterDto.tagNames != null && filterDto.tagNames.Count > 0)
+        {
+            foreach (var tagName in filterDto.tagNames)
+            {
+                filteredTodos = filteredTodos.Where(t => t.tags.Any(tt => tt.name == tagName)).ToList();
+            }
+        }
+        if (filterDto.userId.HasValue)
+            filteredTodos = filteredTodos.Where(t => t.userId == filterDto.userId).ToList();
+        if (filterDto.title != null)
+            filteredTodos = filteredTodos.Where(t => t.title.Contains(filterDto.title)).ToList();
+        if (filterDto.description != null)
+            filteredTodos = filteredTodos.Where(t => t.description.Contains(filterDto.description)).ToList();
+        if (filterDto.todoStatus.HasValue)
+            filteredTodos = filteredTodos.Where(t => t.status == filterDto.todoStatus).ToList();
+        if (filterDto.priorityStatus.HasValue)
+            filteredTodos = filteredTodos.Where(t => t.priority == filterDto.priorityStatus).ToList();
+        if (filterDto.dueDate.HasValue)
+            filteredTodos = filteredTodos.Where(t => t.dueDate == filterDto.dueDate).ToList();
+        if (filterDto.createdAt.HasValue)
+            filteredTodos = filteredTodos.Where(t => t.createdAt == filterDto.createdAt).ToList();
+        if (filterDto.updatedAt.HasValue)
+            filteredTodos = filteredTodos.Where(t => t.updatedAt == filterDto.updatedAt).ToList();
+        return filteredTodos;
     }
 
 }

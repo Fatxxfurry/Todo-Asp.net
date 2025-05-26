@@ -12,6 +12,8 @@ namespace MyApi.Repositories
         Task<List<Todo>> GetByUserIdAsync(int userId);
         Task<List<Todo>> GetByCategoryIdAsync(int categoryId);
         Task<List<Todo>> GetByTagsAsync(List<Tag> tags);
-        Task<IEnumerable<Todo>> FilterAsync(TodosFilterDto filterDto);
+        Task<Todo> AddTagAsync(Todo todo, Tag tag);
+        Task DeleteTagAsync(Todo todo, Tag tag);   
+        Task<List<Todo>> FilterAsync(TodosFilterDto filterDto);
     }
 }

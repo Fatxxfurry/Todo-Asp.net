@@ -7,7 +7,7 @@ public class MappingProfile : Profile
     {
         CreateMap<User, UserDto>();
         CreateMap<UserDto, User>();
-        CreateMap<Todo, TodoDto>().ForMember(dest => dest.tagNames, opt => opt.MapFrom(src => src.tags.Select(t => t.name)));
+        CreateMap<Todo, TodoDto>().ForMember(dest => dest.tagNames, opt => opt.MapFrom(src => src.tags.Select(t => t.name).ToList()));
         CreateMap<TodoDto, Todo>();
         CreateMap<Category, CategoryDto>();
         CreateMap<CategoryDto, Category>();

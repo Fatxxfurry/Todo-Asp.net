@@ -12,7 +12,7 @@ namespace MyApi.Service
         Task DeleteTodoByIdAsync(int id);
         Task<List<TodoDto>> GetTodosByUserIdAsync(int userId);
         Task<List<TodoDto>> GetTodosByCategoryIdAsync(int categoryId);
-        Task<List<TodoDto>> GetTodosByTagIdAsync(int tagId);
+        Task<List<TodoDto>> GetTodosByTagsAsync(List<TagDto> tags);
         Task<List<TodoDto>> FilterTodosAsync(TodosFilterDto filterDto);
     }
 }
