@@ -3,7 +3,7 @@ namespace MyApi.Service
 {
     public interface ICategoryService
     {
-        Task<List<CategoryDto>> GetAllCategoriesAsync(int userId);
+        Task<List<CategoryDto>> GetAllCategoriesAsync();
         Task<CategoryDto> GetCategoryByIdAsync(int id);
         Task<CategoryDto> CreateCategoryAsync(CategoryDto categoryDto);
         Task<CategoryDto> UpdateCategoryAsync(CategoryDto categoryDto);

@@ -16,11 +16,10 @@ namespace MyApi.Service.Impl
             _mapper = mapper;
         }
 
-        public async Task<List<CategoryDto>> GetAllCategoriesAsync(int userId)
+        public async Task<List<CategoryDto>> GetAllCategoriesAsync()
         {
             var categories = await _categoryRepository.GetAllAsync();
-            return categories.Where(c => c.userId == userId)
-                             .Select(category => _mapper.Map<CategoryDto>(category)).ToList();
+            return categories.Select(category => _mapper.Map<CategoryDto>(category)).ToList();
         }
 
         public async Task<CategoryDto> GetCategoryByIdAsync(int id)

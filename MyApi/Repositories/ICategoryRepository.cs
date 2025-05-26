@@ -5,6 +5,7 @@ namespace MyApi.Repositories
     {
         Task<List<Category>> GetAllAsync();
         Task<Category?> GetByIdAsync(int id);
+        Task<List<Category>> GetCategoriesByUserIdAsync(int userId);
         Task<Category> CreateAsync(Category category);
         Task<Category> UpdateAsync(Category category);
         Task DeleteAsync(int id);

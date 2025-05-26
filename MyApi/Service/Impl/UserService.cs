@@ -8,12 +8,18 @@ namespace MyApi.Service.Impl
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly ICategoryService _categoryService;
+        private readonly ITodoService _todoService;
+        private readonly ITagService _tagService;
         private readonly IMapper _mapper;
 
-        public UserService(IUserRepository userRepository, IMapper mapper)
+        public UserService(IUserRepository userRepository, ICategoryService categoryService, ITodoService todoService, ITagService tagService, IMapper mapper)
         {
             try
             {
+                _tagService = tagService ?? throw new ArgumentNullException(nameof(tagService));
+                _todoService = todoService ?? throw new ArgumentNullException(nameof(todoService));
+                _categoryService = categoryService ?? throw new ArgumentNullException(nameof(categoryService));
                 _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
                 _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             }
@@ -23,8 +29,9 @@ namespace MyApi.Service.Impl
             }
         }
 
-        public async Task<UserDto> RegisterAsync(User user)
+        public async Task<UserDto> RegisterAsync(UserDto userDto)
         {
+            var user = _mapper.Map<User>(userDto);
             var createdUser = await _userRepository.CreateUserAsync(user);
             if (createdUser == null)
             {
@@ -75,6 +82,21 @@ namespace MyApi.Service.Impl
             }
             await _userRepository.DeleteUserAsync(id);
             return _mapper.Map<UserDto>(user);
+        }
+        public async Task<IEnumerable<CategoryDto>> GetAllCategoriesByUserIdAsync(int id)
+        {
+            var categories = await _categoryService.GetCategoriesByUserIdAsync(id);
+            return categories.Select(category => _mapper.Map<CategoryDto>(category)).ToList();
+        }
+        public async Task<IEnumerable<TodoDto>> GetAllTodosByUserIdAsync(int id)
+        {
+            var todos = await _todoService.GetTodosByUserIdAsync(id);
+            return todos.Select(todo => _mapper.Map<TodoDto>(todo)).ToList();
+        }
+        public async Task<IEnumerable<TagDto>> GetAllTagsByUserIdAsync(int id)
+        {
+            var tags = await _tagService.GetTagsByUserIdAsync(id);
+            return tags.Select(tag => _mapper.Map<TagDto>(tag)).ToList();
         }
     }
 }

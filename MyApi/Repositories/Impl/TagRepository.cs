@@ -42,6 +42,15 @@ namespace MyApi.Repositories
             if (tag is null)
                 return;
 
+            var todos = await _context.Todos
+                .Where(t => t.tags.Any(tt => tt.id == id))
+                .ToListAsync();
+
+            foreach (var todo in todos)
+            {
+                todo.tags.RemoveAll(tt => tt.id == id);
+            }
+
             _context.Tags.Remove(tag);
             await _context.SaveChangesAsync();
         }

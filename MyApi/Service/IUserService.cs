@@ -4,11 +4,16 @@ namespace MyApi.Service
 {
     public interface IUserService
     {
-        Task<UserDto> RegisterAsync(User user);
+        Task<UserDto> RegisterAsync(UserDto user);
         Task<UserDto> GetByEmailAsync(string email);
         Task<IEnumerable<UserDto>> GetAllUsersAsync();
         Task<UserDto> GetUserByIdAsync(int id);
         Task<UserDto> UpdateUserAsync(UserDto userDto);
         Task<UserDto> DeleteUserAsync(int id);
+        Task<IEnumerable<CategoryDto>> GetAllCategoriesByUserIdAsync(int id);
+        Task<IEnumerable<TodoDto>> GetAllTodosByUserIdAsync(int id);
+        Task<IEnumerable<TagDto>> GetAllTagsByUserIdAsync(int id);
+
+        
     }
 }

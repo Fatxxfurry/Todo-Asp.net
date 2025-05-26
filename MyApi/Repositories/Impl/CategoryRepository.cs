@@ -44,6 +44,10 @@ namespace MyApi.Repositories.Implementations
             _context.Categories.Remove(category);
             await _context.SaveChangesAsync();
         }
+        public async Task<List<Category>> GetCategoriesByUserIdAsync(int userId)
+        {
+            return await _context.Categories.Where(c => c.userId == userId).ToListAsync();
+        }
     }
 }
 
