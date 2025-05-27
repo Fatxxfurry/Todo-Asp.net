@@ -3,6 +3,7 @@ using MyApi.Dto;
 using MyApi.Repositories;
 using AutoMapper;
 using MyApi.Exceptions;
+using Microsoft.AspNetCore.Identity;
 namespace MyApi.Service.Impl
 {
     public class UserService : IUserService
@@ -12,6 +13,8 @@ namespace MyApi.Service.Impl
         private readonly ITodoService _todoService;
         private readonly ITagService _tagService;
         private readonly IMapper _mapper;
+
+        private readonly PasswordHasher<User> _passwordHasher = new PasswordHasher<User>();
 
         public UserService(IUserRepository userRepository, ICategoryService categoryService, ITodoService todoService, ITagService tagService, IMapper mapper)
         {
@@ -32,12 +35,29 @@ namespace MyApi.Service.Impl
         public async Task<UserDto> RegisterAsync(UserDto userDto)
         {
             var user = _mapper.Map<User>(userDto);
+            user.password = _passwordHasher.HashPassword(user, user.password);
             var createdUser = await _userRepository.CreateUserAsync(user);
             if (createdUser == null)
             {
                 throw new InvalidOperationException("User registration failed.");
             }
             return _mapper.Map<UserDto>(createdUser);
+        }
+        public async Task<UserDto> LoginAsync(string email, string password)
+        {
+            var user = await _userRepository.GetByEmailAsync(email);
+            if (user == null)
+            {
+                throw new NotFoundException("User not found.");
+            }
+            switch (_passwordHasher.VerifyHashedPassword(user, user.password, password))
+            {
+                case PasswordVerificationResult.Success:
+                    return _mapper.Map<UserDto>(user);
+                case PasswordVerificationResult.Failed:
+                    throw new UnauthorizedAccessException("Invalid password.");
+            }
+            return _mapper.Map<UserDto>(user);
         }
 
         public async Task<UserDto> GetByEmailAsync(string email)
@@ -69,6 +89,7 @@ namespace MyApi.Service.Impl
         public async Task<UserDto> UpdateUserAsync(UserDto userDto)
         {
             var user = _mapper.Map<User>(userDto);
+            user.password = _passwordHasher.HashPassword(user, user.password);
             var updatedUser = await _userRepository.UpdateUserAsync(user);
             return _mapper.Map<UserDto>(updatedUser);
         }

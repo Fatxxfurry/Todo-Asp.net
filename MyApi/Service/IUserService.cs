@@ -5,6 +5,7 @@ namespace MyApi.Service
     public interface IUserService
     {
         Task<UserDto> RegisterAsync(UserDto user);
+        Task<UserDto> LoginAsync(string email, string password);
         Task<UserDto> GetByEmailAsync(string email);
         Task<IEnumerable<UserDto>> GetAllUsersAsync();
         Task<UserDto> GetUserByIdAsync(int id);
