@@ -38,6 +38,7 @@ builder.Services.AddAuthentication("Bearer")
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("EditPolicy", policy => policy.Requirements.Add(new OwnerOrAdminRequirement()));
+    options.AddPolicy("UserPolicy", policy => policy.Requirements.Add(new UserOwnerOrAdminRequirement()));
 });
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITodoRepository, TodoRepository>();
@@ -49,10 +50,9 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthorizationHandler, OwnerOrAdminHandler<BaseData>>();
+builder.Services.AddScoped<IAuthorizationHandler, UserOwnerOrAdminHandler>();
 
 var app = builder.Build();
-
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
