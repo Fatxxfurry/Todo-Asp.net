@@ -20,14 +20,14 @@ namespace MyApi.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(AuthenticationSchemes = "Bearer", Roles = "ADMIN")]
         public async Task<ActionResult<IEnumerable<TagDto>>> GetAllTags()
         {
             return Ok(await _tagService.GetAllTagsAsync());
         }
 
         [HttpGet("{id}")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<TagDto>> GetTagById(int id)
         {
             var tag = await _tagService.GetTagByIdAsync(id);
@@ -44,7 +44,7 @@ namespace MyApi.Controllers
         }
 
         [HttpPost]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<TagDto>> CreateTag([FromBody] TagDto tagDto)
         {
             var result = await _authorizationService.AuthorizeAsync(User, tagDto, "EditPolicy");
@@ -56,7 +56,7 @@ namespace MyApi.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<TagDto>> UpdateTag([FromBody] TagDto tagDto)
         {
             var result = await _authorizationService.AuthorizeAsync(User, tagDto, "EditPolicy");
@@ -68,7 +68,7 @@ namespace MyApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult> DeleteTag(int id)
         {
             var tag = await _tagService.GetTagByIdAsync(id);

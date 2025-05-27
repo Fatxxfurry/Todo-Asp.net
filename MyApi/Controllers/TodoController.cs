@@ -18,14 +18,14 @@ namespace MyApi.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(AuthenticationSchemes = "Bearer", Roles = "ADMIN")]
         public async Task<ActionResult<IEnumerable<TodoDto>>> GetAllTodos()
         {
             return Ok(await _todoService.GetAllTodosAsync());
         }
 
         [HttpGet("{id}")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<TodoDto>> GetTodoById(int id)
         {
             var todo = await _todoService.GetTodoByIdAsync(id);
@@ -42,7 +42,7 @@ namespace MyApi.Controllers
         }
 
         [HttpPost]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<TodoDto>> CreateTodo([FromBody] TodoDto todoDto)
         {
             var result = await _authorizationService.AuthorizeAsync(User, todoDto, "EditPolicy");
@@ -54,7 +54,7 @@ namespace MyApi.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<TodoDto>> UpdateTodo([FromBody] TodoDto todoDto)
         {
             var result = await _authorizationService.AuthorizeAsync(User, todoDto, "EditPolicy");
@@ -66,7 +66,7 @@ namespace MyApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult> DeleteTodoById(int id)
         {
             var todo = await _todoService.GetTodoByIdAsync(id);

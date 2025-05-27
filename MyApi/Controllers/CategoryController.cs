@@ -18,14 +18,14 @@ namespace MyApi.Controllers
         }
 
         [HttpGet]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer", Roles = "ADMIN")]
         public async Task<ActionResult<IEnumerable<CategoryDto>>> GetAllCategories()
         {
             return Ok(await _categoryService.GetAllCategoriesAsync());
         }
 
         [HttpGet("{id}")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<CategoryDto>> GetCategoryById(int id)
         {
             var category = await _categoryService.GetCategoryByIdAsync(id);
@@ -42,7 +42,7 @@ namespace MyApi.Controllers
         }
 
         [HttpPost]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<CategoryDto>> CreateCategory([FromBody] CategoryDto categoryDto)
         {
             var result = await _authorizationService.AuthorizeAsync(User, categoryDto, "EditPolicy");
@@ -54,7 +54,7 @@ namespace MyApi.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<CategoryDto>> UpdateCategory([FromBody] CategoryDto categoryDto)
         {
             var result = await _authorizationService.AuthorizeAsync(User, categoryDto, "EditPolicy");
@@ -66,7 +66,7 @@ namespace MyApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult> DeleteCategory(int id)
         {
             var category = await _categoryService.GetCategoryByIdAsync(id);

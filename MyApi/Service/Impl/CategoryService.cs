@@ -35,6 +35,8 @@ namespace MyApi.Service.Impl
         public async Task<CategoryDto> CreateCategoryAsync(CategoryDto categoryDto)
         {
             var category = _mapper.Map<Category>(categoryDto);
+            category.createdAt = DateTime.UtcNow;
+            category.updatedAt = DateTime.UtcNow;
             var createdCategory = await _categoryRepository.CreateAsync(category);
             return _mapper.Map<CategoryDto>(createdCategory);
         }
@@ -47,6 +49,7 @@ namespace MyApi.Service.Impl
                 throw new NotFoundException("Category not found.");
             }
             category.name = categoryDto.name;
+            category.updatedAt = DateTime.UtcNow;
             var updatedCategory = await _categoryRepository.UpdateAsync(category);
             return _mapper.Map<CategoryDto>(updatedCategory);
         }

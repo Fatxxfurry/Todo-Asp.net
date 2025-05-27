@@ -2,6 +2,8 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using MyApi.Dto;
 using MyApi.Service;
+using System.Threading.Tasks;
+
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
@@ -16,12 +18,12 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public IActionResult Login([FromBody] LoginRequestDto request)
+    public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
     {
-        var user = _userService.LoginAsync(request.email, request.password);
+        var user = await _userService.LoginAsync(request.email, request.password);
         if (user != null)
         {
-            var token = _jwtService.GenerateToken(user.Result.email, user.Result.id.Value, user.Result.role.ToString());
+            var token = _jwtService.GenerateToken(user.email, user.id.Value, user.role.ToString());
             return Ok(token);
         }
         return Unauthorized();

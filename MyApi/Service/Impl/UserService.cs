@@ -35,6 +35,8 @@ namespace MyApi.Service.Impl
         public async Task<UserDto> RegisterAsync(UserDto userDto)
         {
             var user = _mapper.Map<User>(userDto);
+            user.createdAt = DateTime.Now;
+            user.updatedAt = DateTime.Now;
             user.password = _passwordHasher.HashPassword(user, user.password);
             var createdUser = await _userRepository.CreateUserAsync(user);
             if (createdUser == null)
@@ -90,6 +92,7 @@ namespace MyApi.Service.Impl
         {
             var user = _mapper.Map<User>(userDto);
             user.password = _passwordHasher.HashPassword(user, user.password);
+            user.updatedAt = DateTime.Now;
             var updatedUser = await _userRepository.UpdateUserAsync(user);
             return _mapper.Map<UserDto>(updatedUser);
         }

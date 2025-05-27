@@ -18,14 +18,14 @@ namespace MyApi.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(AuthenticationSchemes = "Bearer", Roles = "ADMIN")]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers()
         {
             return Ok(await _userService.GetAllUsersAsync());
         }
 
         [HttpGet("{id}")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<UserDto>> GetUserById(int id)
         {
             var user = await _userService.GetUserByIdAsync(id);
@@ -42,7 +42,7 @@ namespace MyApi.Controllers
         }
 
         [HttpGet("{id}/categories")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<IEnumerable<CategoryDto>>> GetAllCategoriesByUserId(int id)
         {
             var user = await _userService.GetUserByIdAsync(id);
@@ -59,7 +59,7 @@ namespace MyApi.Controllers
         }
 
         [HttpGet("{id}/todos")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<IEnumerable<TodoDto>>> GetAllTodosByUserId(int id)
         {
             var user = await _userService.GetUserByIdAsync(id);
@@ -76,7 +76,7 @@ namespace MyApi.Controllers
         }
 
         [HttpGet("{id}/tags")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<IEnumerable<TagDto>>> GetAllTagsByUserId(int id)
         {
             var user = await _userService.GetUserByIdAsync(id);
@@ -99,7 +99,7 @@ namespace MyApi.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<UserDto>> UpdateUser([FromBody] UserDto userDto)
         {
             var user = await _userService.GetUserByIdAsync(userDto.id.Value);
@@ -116,7 +116,7 @@ namespace MyApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult> DeleteUser(int id)
         {
             var user = await _userService.GetUserByIdAsync(id);

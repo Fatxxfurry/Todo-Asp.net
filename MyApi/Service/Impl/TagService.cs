@@ -20,6 +20,8 @@ namespace MyApi.Service.Impl
         public async Task<TagDto> CreateTagAsync(TagDto tagDto)
         {
             var tag = _mapper.Map<Tag>(tagDto);
+            tag.createdAt = DateTime.UtcNow;
+            tag.updatedAt = DateTime.UtcNow;
             var createdTag = await _repository.CreateAsync(tag);
             return _mapper.Map<TagDto>(createdTag);
         }
@@ -48,6 +50,7 @@ namespace MyApi.Service.Impl
                 throw new NotFoundException("Tag not found.");
             }
             tag.name = tagDto.name;
+            tag.updatedAt = DateTime.UtcNow;
             var updatedTag = await _repository.UpdateAsync(tag);
             return _mapper.Map<TagDto>(updatedTag);
         }

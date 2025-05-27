@@ -38,6 +38,8 @@ namespace MyApi.Service.Impl
         public async Task<TodoDto> CreateTodoAsync(TodoDto todoDto)
         {
             var todo = _mapper.Map<Todo>(todoDto);
+            todo.createdAt = DateTime.Now;
+            todo.updatedAt = DateTime.Now;
             await _repository.CreateAsync(todo);
             return _mapper.Map<TodoDto>(todo);
         }
