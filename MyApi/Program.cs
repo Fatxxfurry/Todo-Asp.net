@@ -53,6 +53,7 @@ builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthorizationHandler, OwnerOrAdminHandler<BaseData>>();
 builder.Services.AddScoped<IAuthorizationHandler, UserOwnerOrAdminHandler>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.
