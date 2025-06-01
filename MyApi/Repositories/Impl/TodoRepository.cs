@@ -1,4 +1,5 @@
 using MyApi.Models;
+using MyApi.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 using MyApi.Repositories;
 using MyApi.Dto;
@@ -24,6 +25,10 @@ public class TodoRepository : ITodoRepository
 
     public async Task<Todo> CreateAsync(Todo todo)
     {
+        if (todo.dueDate > DateTime.Now)
+        {
+            todo.status = TodoStatus.Overdue;
+        }
         _context.Todos.Add(todo);
         await _context.SaveChangesAsync();
         return todo;
@@ -31,6 +36,10 @@ public class TodoRepository : ITodoRepository
 
     public async Task<Todo> UpdateAsync(Todo todo)
     {
+        if (todo.dueDate > DateTime.Now)
+        {
+            todo.status = TodoStatus.Overdue;
+        }
         _context.Todos.Update(todo);
         await _context.SaveChangesAsync();
         return todo;
@@ -103,12 +112,20 @@ public class TodoRepository : ITodoRepository
         if (filterDto.priorityStatus.HasValue)
             filteredTodos = filteredTodos.Where(t => t.priority == filterDto.priorityStatus).ToList();
         if (filterDto.dueDate.HasValue)
-            filteredTodos = filteredTodos.Where(t => t.dueDate == filterDto.dueDate).ToList();
+            filteredTodos = filteredTodos.Where(t => t.dueDate.Date == filterDto.dueDate.Value.Date).ToList();
         if (filterDto.createdAt.HasValue)
             filteredTodos = filteredTodos.Where(t => t.createdAt == filterDto.createdAt).ToList();
         if (filterDto.updatedAt.HasValue)
             filteredTodos = filteredTodos.Where(t => t.updatedAt == filterDto.updatedAt).ToList();
         return filteredTodos;
     }
+    public async Task<List<Todo>> GetOverdueAsync()
+    {
+        return await _context.Todos.Where(t => t.status == TodoStatus.Overdue).ToListAsync();
+    }
 
+    public async Task<List<Todo>> GetByDueDateAsync(DateTime date)
+    {
+        return await _context.Todos.Where(t => t.dueDate.Date == date.Date).ToListAsync();
+    }
 }

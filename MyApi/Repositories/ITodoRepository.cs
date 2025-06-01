@@ -13,7 +13,9 @@ namespace MyApi.Repositories
         Task<List<Todo>> GetByCategoryIdAsync(int categoryId);
         Task<List<Todo>> GetByTagsAsync(List<Tag> tags);
         Task<Todo> AddTagAsync(Todo todo, Tag tag);
-        Task DeleteTagAsync(Todo todo, Tag tag);   
+        Task DeleteTagAsync(Todo todo, Tag tag);
         Task<List<Todo>> FilterAsync(TodosFilterDto filterDto);
+        Task<List<Todo>> GetOverdueAsync();
+        Task<List<Todo>> GetByDueDateAsync(DateTime dueDate);
     }
 }

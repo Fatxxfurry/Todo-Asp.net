@@ -6,6 +6,7 @@ namespace MyApi.Models.Enums
         NotStarted,
         InProgress,
         Done,
-        Caceled
+        Caceled,
+        Overdue
     }
 }

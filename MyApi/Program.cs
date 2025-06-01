@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using MyApi.Mappers;
 using MyApi.util;
+using MyApi.HostedServices;
 using Microsoft.AspNetCore.Authorization;
 using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
@@ -41,6 +42,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("EditPolicy", policy => policy.Requirements.Add(new OwnerOrAdminRequirement()));
     options.AddPolicy("UserPolicy", policy => policy.Requirements.Add(new UserOwnerOrAdminRequirement()));
 });
+
 builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITodoRepository, TodoRepository>();
@@ -54,7 +56,8 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthorizationHandler, OwnerOrAdminHandler<BaseData>>();
 builder.Services.AddScoped<IAuthorizationHandler, UserOwnerOrAdminHandler>();
 builder.Services.AddScoped<IEmailService, EmailService>();
-
+builder.Services.AddHostedService<TodoStatusUpdater>();
+builder.Services.AddHostedService<TodoTodayEmailNotifier>();
 var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
