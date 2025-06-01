@@ -12,11 +12,13 @@ namespace MyApi.Service.Impl
         private readonly ICategoryService _categoryService;
         private readonly ITodoService _todoService;
         private readonly ITagService _tagService;
+
+        private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IMapper _mapper;
 
         private readonly PasswordHasher<User> _passwordHasher = new PasswordHasher<User>();
 
-        public UserService(IUserRepository userRepository, ICategoryService categoryService, ITodoService todoService, ITagService tagService, IMapper mapper)
+        public UserService(IUserRepository userRepository, ICategoryService categoryService, ITodoService todoService, ITagService tagService, IMapper mapper, IWebHostEnvironment env)
         {
             try
             {
@@ -25,6 +27,7 @@ namespace MyApi.Service.Impl
                 _categoryService = categoryService ?? throw new ArgumentNullException(nameof(categoryService));
                 _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
                 _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+                _webHostEnvironment = env ?? throw new ArgumentNullException(nameof(env));
             }
             catch (Exception ex)
             {
@@ -121,6 +124,25 @@ namespace MyApi.Service.Impl
         {
             var tags = await _tagService.GetTagsByUserIdAsync(id);
             return tags.Select(tag => _mapper.Map<TagDto>(tag)).ToList();
+        }
+        public async Task<UserDto> UpdateUserAvatarAsync(int id, IFormFile file)
+        {
+            var user = await _userRepository.GetByIdAsync(id);
+            if (user == null)
+            {
+                throw new NotFoundException("User not found.");
+            }
+            user.imgName = file.Name;
+            user.updatedAt = DateTime.Now;
+            var projectRoot = Path.GetFullPath(Path.Combine(_webHostEnvironment.ContentRootPath, "..")); 
+            var frontendPublic = Path.Combine(projectRoot, "frontend", "public", "avatars");
+            var filePath = Path.Combine(frontendPublic, file.Name);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+            var updatedUser = await _userRepository.UpdateUserAsync(user);
+            return _mapper.Map<UserDto>(updatedUser);
         }
     }
 }

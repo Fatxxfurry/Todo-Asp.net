@@ -132,5 +132,25 @@ namespace MyApi.Controllers
             await _userService.DeleteUserAsync(id);
             return NoContent();
         }
+        [HttpPut("{id}/avatar/")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<ActionResult<UserDto>> UpdateUserAvatar(int id, IFormFile file)
+        {
+            var user = await _userService.GetUserByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            var result = await _authorizationService.AuthorizeAsync(User, user, "UserPolicy");
+            if (!result.Succeeded)
+            {
+                return Forbid();
+            }
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("No file uploaded.");
+            }
+            return await _userService.UpdateUserAvatarAsync(id, file);
+        }
     }
 }

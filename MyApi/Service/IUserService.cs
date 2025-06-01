@@ -14,7 +14,6 @@ namespace MyApi.Service
         Task<IEnumerable<CategoryDto>> GetAllCategoriesByUserIdAsync(int id);
         Task<IEnumerable<TodoDto>> GetAllTodosByUserIdAsync(int id);
         Task<IEnumerable<TagDto>> GetAllTagsByUserIdAsync(int id);
-
-        
+        Task<UserDto> UpdateUserAvatarAsync(int id, IFormFile file);
     }
 }
