@@ -2,6 +2,7 @@ using MyApi.Service;
 using Microsoft.AspNetCore.Mvc;
 using MyApi.Dto;
 using Microsoft.AspNetCore.Authorization;
+using Mysqlx.Crud;
 namespace MyApi.Controllers
 {
     [ApiController]
@@ -11,8 +12,11 @@ namespace MyApi.Controllers
         private readonly IUserService _userService;
         private readonly IAuthorizationService _authorizationService;
 
-        public UserController(IUserService userService, IAuthorizationService authorizationService)
+        private readonly IRedisCacheService _redisCacheService;
+
+        public UserController(IUserService userService, IAuthorizationService authorizationService, IRedisCacheService redisCacheService)
         {
+            _redisCacheService = redisCacheService;
             _authorizationService = authorizationService;
             _userService = userService;
         }
@@ -95,6 +99,7 @@ namespace MyApi.Controllers
         [HttpPost]
         public async Task<ActionResult<UserDto>> CreateUser([FromBody] UserDto userDto)
         {
+
             return await _userService.RegisterAsync(userDto);
         }
 
@@ -152,5 +157,32 @@ namespace MyApi.Controllers
             }
             return await _userService.UpdateUserAvatarAsync(id, file);
         }
+        [HttpPut("{id}/email")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<ActionResult<UserDto>> UpdateUserEmail(int id, [FromBody] VerifyCodeRequestDto request)
+        {
+            var user = await _userService.GetUserByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            var result = await _authorizationService.AuthorizeAsync(User, user, "UserPolicy");
+            if (!result.Succeeded)
+            {
+                return Forbid();
+            }
+            var storedCode = await _redisCacheService.GetAsync($"verify:{request.Email}");
+
+            if (storedCode == null)
+                return BadRequest("Mã xác minh không tồn tại hoặc đã hết hạn.");
+
+            if (storedCode != request.Code)
+                return BadRequest("Mã xác minh không đúng.");
+
+            await _redisCacheService.DeleteAsync($"verify:{request.Email}");
+            var updatedUser = await _userService.UpdateUserAsync(user);
+            return Ok(updatedUser);
+        }
+
     }
 }

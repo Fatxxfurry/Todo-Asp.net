@@ -134,13 +134,25 @@ namespace MyApi.Service.Impl
             }
             user.imgName = file.Name;
             user.updatedAt = DateTime.Now;
-            var projectRoot = Path.GetFullPath(Path.Combine(_webHostEnvironment.ContentRootPath, "..")); 
+            var projectRoot = Path.GetFullPath(Path.Combine(_webHostEnvironment.ContentRootPath, ".."));
             var frontendPublic = Path.Combine(projectRoot, "frontend", "public", "avatars");
             var filePath = Path.Combine(frontendPublic, file.Name);
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
             }
+            var updatedUser = await _userRepository.UpdateUserAsync(user);
+            return _mapper.Map<UserDto>(updatedUser);
+        }
+        public async Task<UserDto> ForgotPasswordAsync(string email, string password)
+        {
+            var user = await _userRepository.GetByEmailAsync(email);
+            if (user == null)
+            {
+                throw new NotFoundException("User not found.");
+            }
+            user.password = _passwordHasher.HashPassword(user, password);
+            user.updatedAt = DateTime.Now;
             var updatedUser = await _userRepository.UpdateUserAsync(user);
             return _mapper.Map<UserDto>(updatedUser);
         }
