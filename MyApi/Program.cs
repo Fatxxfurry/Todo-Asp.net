@@ -11,6 +11,7 @@ using MyApi.util;
 using MyApi.HostedServices;
 using Microsoft.AspNetCore.Authorization;
 using System.Text.Json.Serialization;
+using StackExchange.Redis;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -42,6 +43,8 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("EditPolicy", policy => policy.Requirements.Add(new OwnerOrAdminRequirement()));
     options.AddPolicy("UserPolicy", policy => policy.Requirements.Add(new UserOwnerOrAdminRequirement()));
 });
+var redisConnectionString = builder.Configuration.GetSection("Redis:ConnectionString").Value;
+builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString));
 
 builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -56,6 +59,7 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthorizationHandler, OwnerOrAdminHandler<BaseData>>();
 builder.Services.AddScoped<IAuthorizationHandler, UserOwnerOrAdminHandler>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IRedisCacheService, RedisCacheService>();
 builder.Services.AddHostedService<TodoStatusUpdater>();
 builder.Services.AddHostedService<TodoTodayEmailNotifier>();
 var app = builder.Build();
