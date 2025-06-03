@@ -1,22 +1,18 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  X,
-  Tag,
-  Calendar,
-  Flag,
-  FileText,
-  List,
-  CheckCircle,
-  Edit,
-  Save,
-  XCircle,
-} from "lucide-react";
+import { X, Save } from "lucide-react";
 import toast from "react-hot-toast";
 
-const TaskDetailPopup = ({ task, isOpen, onClose, onSave }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedTask, setEditedTask] = useState(task);
+const AddTaskModal = ({ isOpen, onClose, onTaskCreated, isQuickAdd }) => {
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    priority: "Low",
+    categoryId: 1,
+    tagNames: [],
+    dueDate: "",
+    status: "Pending",
+  });
 
   const categories = [
     { id: 1, name: "Personal" },
@@ -27,56 +23,9 @@ const TaskDetailPopup = ({ task, isOpen, onClose, onSave }) => {
   const priorities = ["Low", "Medium", "High"];
   const statuses = ["Pending", "InProgress", "Completed"];
 
-  const getPriorityStyles = (priority) => {
-    switch (priority) {
-      case "Low":
-        return "text-emerald-600 bg-emerald-100";
-      case "Medium":
-        return "text-yellow-600 bg-yellow-100";
-      case "High":
-        return "text-red-600 bg-red-100";
-      default:
-        return "text-gray-600 bg-gray-100";
-    }
-  };
-
-  const getStatusStyles = (status) => {
-    switch (status) {
-      case "Pending":
-        return "text-yellow-600 bg-yellow-100";
-      case "InProgress":
-        return "text-blue-600 bg-blue-100";
-      case "Completed":
-        return "text-emerald-600 bg-emerald-100";
-      default:
-        return "text-gray-600 bg-gray-100";
-    }
-  };
-
-  if (!task) return null;
-
-  const handleEdit = () => {
-    setIsEditing(true);
-    setEditedTask(task);
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    setEditedTask(task);
-  };
-
-  const handleSave = () => {
-    if (!editedTask.name.trim()) {
-      toast.error("Title is required!");
-      return;
-    }
-    onSave(editedTask);
-    setIsEditing(false);
-  };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setEditedTask((prev) => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: name === "categoryId" ? Number(value) : value,
     }));
@@ -87,266 +36,177 @@ const TaskDetailPopup = ({ task, isOpen, onClose, onSave }) => {
       .split(",")
       .map((tag) => tag.trim())
       .filter((tag) => tag);
-    setEditedTask((prev) => ({
+    setFormData((prev) => ({
       ...prev,
       tagNames: tags,
     }));
   };
 
-  const handleDueDateChange = (e) => {
-    setEditedTask((prev) => ({
-      ...prev,
-      dueDate: e.target.value,
-    }));
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.title.trim()) {
+      toast.error("Title is required!");
+      return;
+    }
+    onTaskCreated(formData);
   };
-
-  const categoryName =
-    categories.find((cat) => cat.id === task.categoryId)?.name || "Unknown";
 
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          initial={{ x: "100%" }}
-          animate={{ x: 0 }}
-          exit={{ x: "100%" }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-lg z-50 overflow-y-auto"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
         >
-          <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">
-                {isEditing ? "Edit Task" : "Task Details"}
+          <motion.div
+            initial={{ y: "-100vh" }}
+            animate={{ y: 0 }}
+            exit={{ y: "-100vh" }}
+            className="bg-white rounded-lg p-6 w-full max-w-md"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">
+                {isQuickAdd ? "Quick Add Task" : "Add New Task"}
               </h2>
-              <div className="flex items-center space-x-2">
-                {!isEditing && (
-                  <button
-                    onClick={handleEdit}
-                    className="text-emerald-600 hover:text-emerald-800"
-                    title="Edit Task"
-                  >
-                    <Edit className="h-6 w-6" />
-                  </button>
-                )}
-                <button
-                  onClick={onClose}
-                  className="text-gray-500 hover:text-gray-700"
-                  title="Close"
-                >
-                  <X className="h-6 w-6" />
-                </button>
-              </div>
+              <button
+                onClick={onClose}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-6 w-6" />
+              </button>
             </div>
-            <div className="space-y-4">
-              {/* Title */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  <FileText className="inline h-5 w-5 mr-2" />
-                  Title
-                </label>
-                {isEditing ? (
+            <form onSubmit={handleSubmit}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Title
+                  </label>
                   <input
                     type="text"
-                    name="name"
-                    value={editedTask.name || ""}
+                    name="title"
+                    value={formData.title}
                     onChange={handleInputChange}
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    required
                   />
-                ) : (
-                  <p className="mt-1 text-gray-900">{task.name}</p>
-                )}
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  <List className="inline h-5 w-5 mr-2" />
-                  Description
-                </label>
-                {isEditing ? (
-                  <textarea
-                    name="description"
-                    value={editedTask.description || ""}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    rows="4"
-                  />
-                ) : (
-                  <p className="mt-1 text-gray-900">
-                    {task.description || "No description"}
-                  </p>
-                )}
-              </div>
-
-              {/* Priority */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  <Flag className="inline h-5 w-5 mr-2" />
-                  Priority
-                </label>
-                {isEditing ? (
-                  <select
-                    name="priority"
-                    value={editedTask.priority || "Low"}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  >
-                    {priorities.map((priority) => (
-                      <option key={priority} value={priority}>
-                        {priority}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <span
-                    className={`mt-1 inline-block px-3 py-1 rounded-full text-sm font-medium ${getPriorityStyles(
-                      task.priority
-                    )}`}
-                  >
-                    {task.priority}
-                  </span>
-                )}
-              </div>
-
-              {/* Category */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  <List className="inline h-5 w-5 mr-2" />
-                  Category
-                </label>
-                {isEditing ? (
-                  <select
-                    name="categoryId"
-                    value={editedTask.categoryId || 1}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  >
-                    {categories.map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <p className="mt-1 text-gray-900">{categoryName}</p>
-                )}
-              </div>
-
-              {/* Tags */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  <Tag className="inline h-5 w-5 mr-2" />
-                  Tags
-                </label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={editedTask.tagNames?.join(", ") || ""}
-                    onChange={handleTagsChange}
-                    placeholder="Enter tags, separated by commas"
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  />
-                ) : (
-                  <div className="mt-1 flex flex-wrap gap-2">
-                    {task.tagNames && task.tagNames.length > 0 ? (
-                      task.tagNames.map((tag, index) => (
-                        <span
-                          key={index}
-                          className="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-md text-sm"
-                        >
-                          {tag}
-                        </span>
-                      ))
-                    ) : (
-                      <p className="text-gray-500">No tags</p>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Due Date */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  <Calendar className="inline h-5 w-5 mr-2" />
-                  Due Date
-                </label>
-                {isEditing ? (
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Due Date
+                  </label>
                   <input
                     type="datetime-local"
                     name="dueDate"
-                    value={
-                      editedTask.dueDate
-                        ? new Date(editedTask.dueDate)
-                            .toISOString()
-                            .slice(0, 16)
-                        : ""
-                    }
-                    onChange={handleDueDateChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  />
-                ) : (
-                  <p className="mt-1 text-gray-900">
-                    {task.dueDate
-                      ? new Date(task.dueDate).toLocaleString()
-                      : "No due date"}
-                  </p>
-                )}
-              </div>
-
-              {/* Status */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  <CheckCircle className="inline h-5 w-5 mr-2" />
-                  Status
-                </label>
-                {isEditing ? (
-                  <select
-                    name="status"
-                    value={editedTask.status || "Pending"}
+                    value={formData.dueDate}
                     onChange={handleInputChange}
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  >
-                    {statuses.map((status) => (
-                      <option key={status} value={status}>
-                        {status}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <span
-                    className={`mt-1 inline-block px-3 py-1 rounded-full text-sm font-medium ${getStatusStyles(
-                      task.status
-                    )}`}
-                  >
-                    {task.status}
-                  </span>
+                  />
+                </div>
+                {!isQuickAdd && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Description
+                      </label>
+                      <textarea
+                        name="description"
+                        value={formData.description}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500"
+                        rows="4"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Priority
+                      </label>
+                      <select
+                        name="priority"
+                        value={formData.priority}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      >
+                        {priorities.map((priority) => (
+                          <option key={priority} value={priority}>
+                            {priority}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Category
+                      </label>
+                      <select
+                        name="categoryId"
+                        value={formData.categoryId}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      >
+                        {categories.map((category) => (
+                          <option key={category.id} value={category.id}>
+                            {category.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Tags
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.tagNames.join(", ")}
+                        onChange={handleTagsChange}
+                        placeholder="Enter tags, separated by commas"
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Status
+                      </label>
+                      <select
+                        name="status"
+                        value={formData.status}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      >
+                        {statuses.map((status) => (
+                          <option key={status} value={status}>
+                            {status}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </>
                 )}
               </div>
-            </div>
-
-            {isEditing && (
               <div className="mt-6 flex space-x-2">
                 <button
-                  onClick={handleSave}
+                  type="submit"
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
                 >
                   <Save className="h-5 w-5 mr-2" />
                   Save
                 </button>
                 <button
-                  onClick={handleCancel}
+                  type="button"
+                  onClick={onClose}
                   className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
                 >
-                  <XCircle className="h-5 w-5 mr-2" />
+                  <X className="h-5 w-5 mr-2" />
                   Cancel
                 </button>
               </div>
-            )}
-          </div>
+            </form>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
   );
 };
 
-export default TaskDetailPopup;
+export default AddTaskModal;
