@@ -3,9 +3,9 @@ import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import { Toaster } from "react-hot-toast";
-import { useUserStore } from "./Stores/useUserStore";
 import { useEffect } from "react";
 import LoadingSpinner from "./components/LoadingSpinner";
+import { useUserStore } from "./stores/useUserStore";
 
 function App() {
   const { user, checkAuth, checkingAuth } = useUserStore();

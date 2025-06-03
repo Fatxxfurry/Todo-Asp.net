@@ -40,7 +40,6 @@ export const useUserStore = create((set, get) => ({
 
   logout: async () => {
     try {
-      await axios.post("/auth/logout");
       set({ user: null });
       localStorage.removeItem("token");
     } catch (error) {
@@ -76,7 +75,6 @@ export const useUserStore = create((set, get) => ({
   },
 }));
 
-
 let refreshPromise = null;
 
 axios.interceptors.response.use(
@@ -87,20 +85,17 @@ axios.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        
         if (refreshPromise) {
           await refreshPromise;
           return axios(originalRequest);
         }
 
-    
         refreshPromise = useUserStore.getState().refreshToken();
         await refreshPromise;
         refreshPromise = null;
 
         return axios(originalRequest);
       } catch (refreshError) {
-    
         useUserStore.getState().logout();
         return Promise.reject(refreshError);
       }
