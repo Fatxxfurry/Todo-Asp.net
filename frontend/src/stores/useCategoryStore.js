@@ -18,10 +18,13 @@ export const useCategoryStore = create((set) => ({
     }
   },
 
-  addCategory: async (categoryName) => {
+  addCategory: async (categoryName, userId) => {
     set({ loading: true });
     try {
-      const response = await axios.post("/category", { name: categoryName });
+      const response = await axios.post("/category", {
+        name: categoryName,
+        userId,
+      });
       set((state) => ({
         categories: [...state.categories, response.data],
         loading: false,
@@ -69,4 +72,3 @@ export const useCategoryStore = create((set) => ({
     }
   },
 }));
-

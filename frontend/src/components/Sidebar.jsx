@@ -1,49 +1,50 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  Search,
   ChevronRight,
   ChevronDown,
   Plus,
   X,
   LogOut,
+  BarChart2,
 } from "lucide-react";
 import { useUserStore } from "../stores/useUserStore";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-
+import { useCategoryStore } from "../stores/useCategoryStore";
 const Sidebar = ({
   sidebarOpen,
   setSidebarOpen,
   activeSection,
   setActiveSection,
+  activeCategory,
+  setActiveCategory,
+  setIsQuickAddModalOpen,
 }) => {
-  const [listsExpanded, setListsExpanded] = useState(true);
+  const [categoriesExpanded, setCategoriesExpanded] = useState(true);
+  const { user } = useUserStore();
   const [tagsExpanded, setTagsExpanded] = useState(true);
-  const [lists, setLists] = useState([
-    { name: "Personal", count: 3, color: "bg-pink-200" },
-    { name: "Work", count: 3, color: "bg-cyan-200" },
-    { name: "List 1", count: 3, color: "bg-yellow-200" },
-  ]);
+  const { categories, fetchUserCategories, addCategory } = useCategoryStore();
   const [tags, setTags] = useState(["Tag 1", "Tag 2"]);
 
   const { logout } = useUserStore();
   const navigate = useNavigate();
 
-  const handleAddList = () => {
-    const newListName = prompt("Enter new list name:");
-    if (newListName) {
-      setLists([
-        ...lists,
-        { name: newListName, count: 0, color: "bg-gray-200" },
-      ]);
+  useEffect(() => {
+    fetchUserCategories(user.id);
+  }, []);
+  const handleAddCategory = () => {
+    const newCategoryName = prompt("Enter new category name:");
+    if (newCategoryName) {
+      addCategory(newCategoryName, user.id);
+      fetchUserCategories(user.id);
     }
   };
 
   const handleAddTag = () => {
-    const newTag = prompt("Enter new tag:");
-    if (newTag) {
-      setTags([...tags, newTag]);
-    }
+    // const newTag = prompt("Enter new tag:");
+    // if (newTag) {
+    //   setTags([...tags, newTag]);
+    // }
   };
 
   const handleLogout = () => {
@@ -69,27 +70,22 @@ const Sidebar = ({
       </div>
 
       <div className="p-4 border-b border-gray-200">
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
-          </div>
-          <input
-            type="text"
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm text-gray-600 placeholder-gray-400"
-            placeholder="Search"
-          />
-        </div>
-      </div>
-
-      <div className="p-4 border-b border-gray-200">
         <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
           TASKS
         </h3>
         <ul className="mt-2 space-y-1">
-          <li className="flex items-center justify-between py-2 px-2 rounded hover:bg-gray-100 cursor-pointer">
+          <li
+            className={`flex items-center justify-between py-2 px-2 rounded hover:bg-gray-100 cursor-pointer ${
+              activeSection === "Upcoming" ? "bg-gray-100" : ""
+            }`}
+            onClick={() => {
+              setActiveSection("Upcoming");
+              setActiveCategory(null);
+            }}
+          >
             <div className="flex items-center">
               <ChevronRight className="h-4 w-4 text-gray-400 mr-2" />
-              <span className="text-gray-600">Upcoming</span>
+              <span className="text-sm text-gray-600">Upcoming</span>
             </div>
             <span className="text-xs bg-gray-200 rounded-full px-2 py-1 text-gray-600">
               12
@@ -97,67 +93,73 @@ const Sidebar = ({
           </li>
           <li
             className={`flex items-center justify-between py-2 px-2 rounded hover:bg-gray-100 cursor-pointer ${
-              activeSection === "Today" ? "bg-gray-100" : ""
+              activeSection === "All Tasks" ? "bg-gray-100" : ""
             }`}
-            onClick={() => setActiveSection("Today")}
+            onClick={() => {
+              setActiveSection("All Tasks");
+              setActiveCategory(null);
+            }}
           >
             <div className="flex items-center">
               <ChevronRight className="h-4 w-4 text-gray-400 mr-2" />
-              <span className="text-gray-600">Today</span>
+              <span className="text-sm text-gray-600">All Tasks</span>
             </div>
             <span className="text-xs bg-gray-200 rounded-full px-2 py-1 text-gray-600">
-              5
+              13
             </span>
           </li>
-          <li className="flex items-center justify-between py-2 px-2 rounded hover:bg-gray-100 cursor-pointer bg-gray-100">
+          <li
+            className={`flex items-center justify-between py-2 px-2 rounded hover:bg-gray-100 cursor-pointer ${
+              activeSection === "Statistics" ? "bg-gray-100" : ""
+            }`}
+            onClick={() => {
+              setActiveSection("Statistics");
+              setActiveCategory(null);
+            }}
+          >
             <div className="flex items-center">
-              <ChevronRight className="h-4 w-4 text-gray-400 mr-2" />
-              <span className="text-gray-600">Sticky Wall</span>
+              <BarChart2 className="h-4 w-4 text-gray-400 mr-2" />
+              <span className="text-sm text-gray-600">Statistics</span>
             </div>
             <span className="text-xs bg-gray-200 rounded-full px-2 py-1 text-gray-600">
-              0
+              -
             </span>
           </li>
         </ul>
       </div>
 
       <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-            LISTS
-          </h3>
-          <button onClick={() => setListsExpanded(!listsExpanded)}>
-            {listsExpanded ? (
-              <ChevronDown className="h-4 w-4 text-gray-500" />
-            ) : (
-              <ChevronRight className="h-4 w-4 text-gray-500" />
-            )}
-          </button>
-        </div>
-        {listsExpanded && (
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          CATEGORIES
+        </h3>
+        {categoriesExpanded && (
           <ul className="mt-2 space-y-1">
-            {lists.map((list, index) => (
+            {categories.map((category) => (
               <li
-                key={index}
-                className="flex items-center justify-between py-2 px-2 rounded hover:bg-gray-100 cursor-pointer"
+                key={category.id}
+                className={`flex items-center justify-between py-2 px-2 rounded hover:bg-gray-100 cursor-pointer ${
+                  activeCategory === category.name &&
+                  activeSection === "Category"
+                    ? "bg-gray-100"
+                    : ""
+                }`}
+                onClick={() => {
+                  setActiveCategory(category.id);
+                  setActiveSection("Category");
+                }}
               >
                 <div className="flex items-center">
-                  <span
-                    className={`w-2 h-2 rounded-full mr-2 ${list.color}`}
-                  ></span>
-                  <span className="text-gray-600">{list.name}</span>
+                  <span className={`w-2 h-2 rounded-full mr-2`} />
+                  <span className="text-sm text-gray-600">{category.name}</span>
                 </div>
-                <span className="text-xs bg-gray-200 rounded-full px-2 py-1 text-gray-600">
-                  {list.count}
-                </span>
               </li>
             ))}
             <li
               className="flex items-center py-2 px-2 rounded hover:bg-gray-100 cursor-pointer text-emerald-600"
-              onClick={handleAddList}
+              onClick={handleAddCategory}
             >
               <Plus className="h-4 w-4 mr-2" />
-              <span className="text-gray-600">Add New List</span>
+              <span className="text-sm text-gray-600">Add New Category</span>
             </li>
           </ul>
         )}
@@ -170,9 +172,9 @@ const Sidebar = ({
           </h3>
           <button onClick={() => setTagsExpanded(!tagsExpanded)}>
             {tagsExpanded ? (
-              <ChevronDown className="h-4 w-4 text-gray-500" />
+              <ChevronDown className="h-4 w-4 text-gray-400" />
             ) : (
-              <ChevronRight className="h-4 w-4 text-gray-500" />
+              <ChevronRight className="h-4 w-4 text-gray-400" />
             )}
           </button>
         </div>
@@ -182,8 +184,8 @@ const Sidebar = ({
               <span
                 key={index}
                 className={`text-xs px-2 py-1 rounded-full ${
-                  index === 0 ? "bg-cyan-200" : "bg-pink-200"
-                } text-gray-600`}
+                  index === 0 ? "bg-blue-200" : "bg-pink-200"
+                } text-gray-700`}
               >
                 {tag}
               </span>
@@ -192,24 +194,36 @@ const Sidebar = ({
               className="text-xs bg-gray-200 rounded-full px-2 py-1 text-emerald-600 flex items-center"
               onClick={handleAddTag}
             >
-              <Plus className="h-3 w-3 mr-1" />{" "}
+              <Plus className="h-3 w-3 mr-1" />
               <span className="text-gray-600">Add Tag</span>
             </button>
           </div>
         )}
       </div>
 
+      <div className="p-4 border-b border-gray-200">
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          ACTIONS
+        </h3>
+        <ul className="mt-2 space-y-1">
+          <li
+            className="flex items-center py-2 px-2 rounded hover:bg-gray-100 cursor-pointer text-emerald-600"
+            onClick={() => setIsQuickAddModalOpen(true)}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            <span className="text-sm text-gray-600">Quick Add Task</span>
+          </li>
+        </ul>
+      </div>
+
       <div className="p-4">
         <ul className="space-y-2">
-          <li className="flex items-center py-2 px-2 rounded hover:bg-gray-100 cursor-pointer">
-            <span className="text-gray-600">Settings</span>
-          </li>
           <li
             className="flex items-center py-2 px-2 rounded hover:bg-gray-100 cursor-pointer text-red-600"
             onClick={handleLogout}
           >
             <LogOut className="h-5 w-5 mr-2" />
-            <span>Sign out</span>
+            <span className="text-sm text-gray-600">Sign out</span>
           </li>
         </ul>
       </div>

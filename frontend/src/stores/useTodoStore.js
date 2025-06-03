@@ -1,17 +1,21 @@
 import { create } from "zustand";
 import axios from "../lib/axios";
 import { toast } from "react-hot-toast";
+import { json } from "react-router-dom";
 
 export const useTodoStore = create((set, get) => ({
   todos: [],
   fetchUserTodos: async (userId) => {
     set({ loading: true });
     try {
-      const response = await axios.get(`/todo/user/${userId}`);
-      set({ todos: response, loading: false });
+      const response = await axios.get(`/user/${userId}/todos`);
+      set({
+        todos: response.data,
+        loading: false,
+      });
     } catch (error) {
-      toast.error("Failed to fetch todos");
       set({ loading: false });
+      toast.error("Failed to fetch todos");
     }
   },
   deleteTodo: async (todoId) => {
@@ -31,6 +35,15 @@ export const useTodoStore = create((set, get) => ({
   addTodo: async (payload) => {
     set({ loading: true });
     try {
+      const todoDto = {
+        title: payload.title,
+        description: payload.description,
+        category: payload.category,
+        priority: payload.priority,
+        dueDate: payload.dueDate, 
+        userId: payload.userId,
+        categoryId: payload.categoryId,
+      };
       const response = await axios.post("/todo", payload);
       set((state) => ({
         todos: [...state.todos, response.data],

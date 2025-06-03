@@ -11,9 +11,9 @@ const TaskList = ({
   const getPriorityStyles = (priority) => {
     switch (priority) {
       case "Low":
-        return { border: "border-emerald-600", bg: "bg-emerald-100" }; // Đậm hơn
+        return { border: "border-emerald-600", bg: "bg-emerald-100" }; 
       case "Medium":
-        return { border: "border-yellow-500", bg: "bg-yellow-50" }; // Giữ nguyên
+        return { border: "border-yellow-500", bg: "bg-yellow-50" }; 
       case "High":
         return { border: "border-red-600", bg: "bg-red-100" }; // Đậm hơn
       default:
@@ -64,7 +64,7 @@ const TaskList = ({
                             : "text-gray-700"
                         }`}
                       >
-                        {task.name}
+                        {task.title}
                       </span>
                     </div>
                     <button
