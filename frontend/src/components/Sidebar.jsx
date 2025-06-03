@@ -1,12 +1,5 @@
 import { useState } from "react";
-import {
-  Search,
-  ChevronRight,
-  ChevronDown,
-  Plus,
-  X,
-  LogOut,
-} from "lucide-react";
+import { ChevronRight, ChevronDown, Plus, X, LogOut } from "lucide-react";
 import { useUserStore } from "../stores/useUserStore";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -17,9 +10,9 @@ const Sidebar = ({
   activeSection,
   setActiveSection,
 }) => {
-  const [listsExpanded, setListsExpanded] = useState(true);
+  const [categoriesExpanded, setCategoriesExpanded] = useState(true);
   const [tagsExpanded, setTagsExpanded] = useState(true);
-  const [lists, setLists] = useState([
+  const [categories, setCategories] = useState([
     { name: "Personal", count: 3, color: "bg-pink-200" },
     { name: "Work", count: 3, color: "bg-cyan-200" },
     { name: "List 1", count: 3, color: "bg-yellow-200" },
@@ -29,12 +22,12 @@ const Sidebar = ({
   const { logout } = useUserStore();
   const navigate = useNavigate();
 
-  const handleAddList = () => {
-    const newListName = prompt("Enter new list name:");
-    if (newListName) {
-      setLists([
-        ...lists,
-        { name: newListName, count: 0, color: "bg-gray-200" },
+  const handleAddCategory = () => {
+    const newCategoryName = prompt("Enter new category name:");
+    if (newCategoryName) {
+      setCategories([
+        ...categories,
+        { name: newCategoryName, count: 0, color: "bg-gray-200" },
       ]);
     }
   };
@@ -69,24 +62,16 @@ const Sidebar = ({
       </div>
 
       <div className="p-4 border-b border-gray-200">
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
-          </div>
-          <input
-            type="text"
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm text-gray-600 placeholder-gray-400"
-            placeholder="Search"
-          />
-        </div>
-      </div>
-
-      <div className="p-4 border-b border-gray-200">
         <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
           TASKS
         </h3>
         <ul className="mt-2 space-y-1">
-          <li className="flex items-center justify-between py-2 px-2 rounded hover:bg-gray-100 cursor-pointer">
+          <li
+            className={`flex items-center justify-between py-2 px-2 rounded hover:bg-gray-100 cursor-pointer ${
+              activeSection === "Upcoming" ? "bg-gray-100" : ""
+            }`}
+            onClick={() => setActiveSection("Upcoming")}
+          >
             <div className="flex items-center">
               <ChevronRight className="h-4 w-4 text-gray-400 mr-2" />
               <span className="text-gray-600">Upcoming</span>
@@ -97,25 +82,16 @@ const Sidebar = ({
           </li>
           <li
             className={`flex items-center justify-between py-2 px-2 rounded hover:bg-gray-100 cursor-pointer ${
-              activeSection === "Today" ? "bg-gray-100" : ""
+              activeSection === "All Tasks" ? "bg-gray-100" : ""
             }`}
-            onClick={() => setActiveSection("Today")}
+            onClick={() => setActiveSection("All Tasks")}
           >
             <div className="flex items-center">
               <ChevronRight className="h-4 w-4 text-gray-400 mr-2" />
-              <span className="text-gray-600">Today</span>
+              <span className="text-gray-600">All Tasks</span>
             </div>
             <span className="text-xs bg-gray-200 rounded-full px-2 py-1 text-gray-600">
-              5
-            </span>
-          </li>
-          <li className="flex items-center justify-between py-2 px-2 rounded hover:bg-gray-100 cursor-pointer bg-gray-100">
-            <div className="flex items-center">
-              <ChevronRight className="h-4 w-4 text-gray-400 mr-2" />
-              <span className="text-gray-600">Sticky Wall</span>
-            </div>
-            <span className="text-xs bg-gray-200 rounded-full px-2 py-1 text-gray-600">
-              0
+              13
             </span>
           </li>
         </ul>
@@ -124,40 +100,40 @@ const Sidebar = ({
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-            LISTS
+            CATEGORIES
           </h3>
-          <button onClick={() => setListsExpanded(!listsExpanded)}>
-            {listsExpanded ? (
+          <button onClick={() => setCategoriesExpanded(!categoriesExpanded)}>
+            {categoriesExpanded ? (
               <ChevronDown className="h-4 w-4 text-gray-500" />
             ) : (
               <ChevronRight className="h-4 w-4 text-gray-500" />
             )}
           </button>
         </div>
-        {listsExpanded && (
+        {categoriesExpanded && (
           <ul className="mt-2 space-y-1">
-            {lists.map((list, index) => (
+            {categories.map((category, index) => (
               <li
                 key={index}
                 className="flex items-center justify-between py-2 px-2 rounded hover:bg-gray-100 cursor-pointer"
               >
                 <div className="flex items-center">
                   <span
-                    className={`w-2 h-2 rounded-full mr-2 ${list.color}`}
+                    className={`w-2 h-2 rounded-full mr-2 ${category.color}`}
                   ></span>
-                  <span className="text-gray-600">{list.name}</span>
+                  <span className="text-gray-600">{category.name}</span>
                 </div>
                 <span className="text-xs bg-gray-200 rounded-full px-2 py-1 text-gray-600">
-                  {list.count}
+                  {category.count}
                 </span>
               </li>
             ))}
             <li
               className="flex items-center py-2 px-2 rounded hover:bg-gray-100 cursor-pointer text-emerald-600"
-              onClick={handleAddList}
+              onClick={handleAddCategory}
             >
               <Plus className="h-4 w-4 mr-2" />
-              <span className="text-gray-600">Add New List</span>
+              <span className="text-gray-600">Add New Category</span>
             </li>
           </ul>
         )}
@@ -192,7 +168,7 @@ const Sidebar = ({
               className="text-xs bg-gray-200 rounded-full px-2 py-1 text-emerald-600 flex items-center"
               onClick={handleAddTag}
             >
-              <Plus className="h-3 w-3 mr-1" />{" "}
+              <Plus className="h-3 w-3 mr-1" />
               <span className="text-gray-600">Add Tag</span>
             </button>
           </div>

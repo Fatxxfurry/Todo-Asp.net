@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { LogIn, Mail, Lock, Loader, ArrowRight } from "lucide-react";
 import { useUserStore } from "../stores/useUserStore";
 
-
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -129,4 +128,3 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-
