@@ -1,272 +1,352 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useForm, Controller } from "react-hook-form";
-import { X, Tag, Calendar, Flag, FileText, List } from "lucide-react";
-import { toast } from "react-hot-toast";
-import axios from "axios";
-import { useUserStore } from "../stores/useUserStore";
+import {
+  X,
+  Tag,
+  Calendar,
+  Flag,
+  FileText,
+  List,
+  CheckCircle,
+  Edit,
+  Save,
+  XCircle,
+} from "lucide-react";
+import toast from "react-hot-toast";
 
-const AddTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
-  const { user } = useUserStore();
-  const {
-    register,
-    handleSubmit,
-    control,
-    reset,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm({
-    defaultValues: {
-      title: "",
-      description: "",
-      priority: "Low",
-      categoryId: "",
-      tagNames: [],
-      dueDate: "",
-    },
-  });
-  const [categories, setCategories] = useState([]);
-  const [newTag, setNewTag] = useState("");
+const TaskDetailPopup = ({ task, isOpen, onClose, onSave }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTask, setEditedTask] = useState(task);
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get("/api/categories");
-        setCategories(response.data);
-      } catch (error) {
-        console.error("Failed to fetch categories:", error);
-        toast.error("Failed to load categories");
-      }
-    };
-    fetchCategories();
-  }, []);
+  const categories = [
+    { id: 1, name: "Personal" },
+    { id: 2, name: "Work" },
+    { id: 3, name: "List 1" },
+  ];
 
-  const handleAddTag = () => {
-    if (newTag.trim()) {
-      const currentTags = watch("tagNames") || [];
-      setValue("tagNames", [...currentTags, newTag.trim()]);
-      setNewTag("");
+  const priorities = ["Low", "Medium", "High"];
+  const statuses = ["Pending", "InProgress", "Completed"];
+
+  const getPriorityStyles = (priority) => {
+    switch (priority) {
+      case "Low":
+        return "text-emerald-600 bg-emerald-100";
+      case "Medium":
+        return "text-yellow-600 bg-yellow-100";
+      case "High":
+        return "text-red-600 bg-red-100";
+      default:
+        return "text-gray-600 bg-gray-100";
     }
   };
 
-  const handleRemoveTag = (index) => {
-    const currentTags = watch("tagNames") || [];
-    setValue(
-      "tagNames",
-      currentTags.filter((_, i) => i !== index)
-    );
-  };
-
-  const onSubmit = async (data) => {
-    try {
-      const todoData = {
-        ...data,
-        userId: user.id,
-        status: "Pending",
-      };
-      const response = await axios.post("/api/todos", todoData);
-      toast.success("Task created successfully!");
-      onTaskCreated(response.data);
-      reset();
-      onClose();
-    } catch (error) {
-      console.error("Failed to create task:", error);
-      toast.error(error.response?.data?.message || "Failed to create task");
+  const getStatusStyles = (status) => {
+    switch (status) {
+      case "Pending":
+        return "text-yellow-600 bg-yellow-100";
+      case "InProgress":
+        return "text-blue-600 bg-blue-100";
+      case "Completed":
+        return "text-emerald-600 bg-emerald-100";
+      default:
+        return "text-gray-600 bg-gray-100";
     }
   };
+
+  if (!task) return null;
+
+  const handleEdit = () => {
+    setIsEditing(true);
+    setEditedTask(task);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setEditedTask(task);
+  };
+
+  const handleSave = () => {
+    if (!editedTask.name.trim()) {
+      toast.error("Title is required!");
+      return;
+    }
+    onSave(editedTask);
+    setIsEditing(false);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditedTask((prev) => ({
+      ...prev,
+      [name]: name === "categoryId" ? Number(value) : value,
+    }));
+  };
+
+  const handleTagsChange = (e) => {
+    const tags = e.target.value
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter((tag) => tag);
+    setEditedTask((prev) => ({
+      ...prev,
+      tagNames: tags,
+    }));
+  };
+
+  const handleDueDateChange = (e) => {
+    setEditedTask((prev) => ({
+      ...prev,
+      dueDate: e.target.value,
+    }));
+  };
+
+  const categoryName =
+    categories.find((cat) => cat.id === task.categoryId)?.name || "Unknown";
 
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          initial={{ x: "100%" }}
+          animate={{ x: 0 }}
+          exit={{ x: "100%" }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          className="fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-lg z-50 overflow-y-auto"
         >
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
-            className="bg-white rounded-lg p-6 w-full max-w-md"
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-900">Add New Task</h2>
-              <button
-                onClick={onClose}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="h-6 w-6" />
-              </button>
+          <div className="p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">
+                {isEditing ? "Edit Task" : "Task Details"}
+              </h2>
+              <div className="flex items-center space-x-2">
+                {!isEditing && (
+                  <button
+                    onClick={handleEdit}
+                    className="text-emerald-600 hover:text-emerald-800"
+                    title="Edit Task"
+                  >
+                    <Edit className="h-6 w-6" />
+                  </button>
+                )}
+                <button
+                  onClick={onClose}
+                  className="text-gray-500 hover:text-gray-700"
+                  title="Close"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
             </div>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-4">
+              {/* Title */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   <FileText className="inline h-5 w-5 mr-2" />
                   Title
                 </label>
-                <input
-                  {...register("title", { required: "Title is required" })}
-                  className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
-                  placeholder="Task title"
-                />
-                {errors.title && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.title.message}
-                  </p>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    name="name"
+                    value={editedTask.name || ""}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  />
+                ) : (
+                  <p className="mt-1 text-gray-900">{task.name}</p>
                 )}
               </div>
+
+              {/* Description */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   <List className="inline h-5 w-5 mr-2" />
                   Description
                 </label>
-                <textarea
-                  {...register("description", {
-                    required: "Description is required",
-                  })}
-                  className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
-                  placeholder="Task description"
-                  rows="4"
-                />
-                {errors.description && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.description.message}
+                {isEditing ? (
+                  <textarea
+                    name="description"
+                    value={editedTask.description || ""}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    rows="4"
+                  />
+                ) : (
+                  <p className="mt-1 text-gray-900">
+                    {task.description || "No description"}
                   </p>
                 )}
               </div>
+
+              {/* Priority */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   <Flag className="inline h-5 w-5 mr-2" />
                   Priority
                 </label>
-                <Controller
-                  name="priority"
-                  control={control}
-                  rules={{ required: "Priority is required" }}
-                  render={({ field }) => (
-                    <select
-                      {...field}
-                      className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
-                    >
-                      <option value="">Select priority</option>
-                      <option value="Low">Low</option>
-                      <option value="Medium">Medium</option>
-                      <option value="High">High</option>
-                    </select>
-                  )}
-                />
-                {errors.priority && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.priority.message}
-                  </p>
+                {isEditing ? (
+                  <select
+                    name="priority"
+                    value={editedTask.priority || "Low"}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  >
+                    {priorities.map((priority) => (
+                      <option key={priority} value={priority}>
+                        {priority}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <span
+                    className={`mt-1 inline-block px-3 py-1 rounded-full text-sm font-medium ${getPriorityStyles(
+                      task.priority
+                    )}`}
+                  >
+                    {task.priority}
+                  </span>
                 )}
               </div>
+
+              {/* Category */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   <List className="inline h-5 w-5 mr-2" />
                   Category
                 </label>
-                <Controller
-                  name="categoryId"
-                  control={control}
-                  rules={{ required: "Category is required" }}
-                  render={({ field }) => (
-                    <select
-                      {...field}
-                      className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
-                    >
-                      <option value="">Select a category</option>
-                      {categories.map((category) => (
-                        <option key={category.id} value={category.id}>
-                          {category.name}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                />
-                {errors.categoryId && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.categoryId.message}
-                  </p>
+                {isEditing ? (
+                  <select
+                    name="categoryId"
+                    value={editedTask.categoryId || 1}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  >
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <p className="mt-1 text-gray-900">{categoryName}</p>
                 )}
               </div>
+
+              {/* Tags */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   <Tag className="inline h-5 w-5 mr-2" />
                   Tags
                 </label>
-                <div className="mt-1 flex space-x-2">
+                {isEditing ? (
                   <input
-                    value={newTag}
-                    onChange={(e) => setNewTag(e.target.value)}
-                    className="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
-                    placeholder="Add a tag"
+                    type="text"
+                    value={editedTask.tagNames?.join(", ") || ""}
+                    onChange={handleTagsChange}
+                    placeholder="Enter tags, separated by commas"
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500"
                   />
-                  <button
-                    type="button"
-                    onClick={handleAddTag}
-                    className="px-3 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700"
-                  >
-                    Add
-                  </button>
-                </div>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {watch("tagNames")?.map((tag, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center px-2 py-1 bg-emerald-100 text-emerald-800 rounded-md"
-                    >
-                      {tag}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveTag(index)}
-                        className="ml-2 text-emerald-600 hover:text-emerald-800"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                ) : (
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {task.tagNames && task.tagNames.length > 0 ? (
+                      task.tagNames.map((tag, index) => (
+                        <span
+                          key={index}
+                          className="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-md text-sm"
+                        >
+                          {tag}
+                        </span>
+                      ))
+                    ) : (
+                      <p className="text-gray-500">No tags</p>
+                    )}
+                  </div>
+                )}
               </div>
+
+              {/* Due Date */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   <Calendar className="inline h-5 w-5 mr-2" />
                   Due Date
                 </label>
-                <input
-                  type="datetime-local"
-                  {...register("dueDate", { required: "Due date is required" })}
-                  className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
-                />
-                {errors.dueDate && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.dueDate.message}
+                {isEditing ? (
+                  <input
+                    type="datetime-local"
+                    name="dueDate"
+                    value={
+                      editedTask.dueDate
+                        ? new Date(editedTask.dueDate)
+                            .toISOString()
+                            .slice(0, 16)
+                        : ""
+                    }
+                    onChange={handleDueDateChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  />
+                ) : (
+                  <p className="mt-1 text-gray-900">
+                    {task.dueDate
+                      ? new Date(task.dueDate).toLocaleString()
+                      : "No due date"}
                   </p>
                 )}
               </div>
-              <div className="flex justify-end space-x-2">
+
+              {/* Status */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  <CheckCircle className="inline h-5 w-5 mr-2" />
+                  Status
+                </label>
+                {isEditing ? (
+                  <select
+                    name="status"
+                    value={editedTask.status || "Pending"}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  >
+                    {statuses.map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <span
+                    className={`mt-1 inline-block px-3 py-1 rounded-full text-sm font-medium ${getStatusStyles(
+                      task.status
+                    )}`}
+                  >
+                    {task.status}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {isEditing && (
+              <div className="mt-6 flex space-x-2">
                 <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-4 py-2 bg-gray-300 text-gray-900 rounded-md hover:bg-gray-400"
+                  onClick={handleSave}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
                 >
+                  <Save className="h-5 w-5 mr-2" />
+                  Save
+                </button>
+                <button
+                  onClick={handleCancel}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
+                >
+                  <XCircle className="h-5 w-5 mr-2" />
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
-                >
-                  Create Task
-                </button>
               </div>
-            </form>
-          </motion.div>
+            )}
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
   );
 };
 
-export default AddTaskModal;
+export default TaskDetailPopup;
