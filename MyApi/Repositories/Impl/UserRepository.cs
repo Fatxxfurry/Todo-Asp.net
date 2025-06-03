@@ -27,6 +27,21 @@ namespace MyApi.Repositories.Implementations
             if (user is null)
                 return;
 
+            var todos = await _context.Todos
+                .Where(t => t.userId == id)
+                .ToListAsync();
+            _context.Todos.RemoveRange(todos);
+
+            var tags = await _context.Tags
+                .Where(t => t.userId == id)
+                .ToListAsync();
+            _context.Tags.RemoveRange(tags);
+
+            var categories = await _context.Categories
+                .Where(c => c.userId == id)
+                .ToListAsync();
+            _context.Categories.RemoveRange(categories);
+
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
         }

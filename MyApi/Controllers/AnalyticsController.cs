@@ -28,9 +28,9 @@ public class AnalyticsController : ControllerBase
         var users = await _userService.GetAllUserAnalyticsAsync();
         var result = new
         {
-            tags = tags.Count,
-            categories = categories.Count,
-            todos = todos.Count,
+            todoCount = todos.Count,
+            categoryCount = categories.Count,
+            tagCount = tags.Count,  
             users = users
         };
         return Ok(result);

@@ -14,7 +14,9 @@ public class UserOwnerOrAdminHandler : AuthorizationHandler<UserOwnerOrAdminRequ
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, UserOwnerOrAdminRequirement requirement, UserDto user)
     {
         var userId = int.Parse(context.User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier).Value);
-        if (userId == user.id)
+        var isAdmin = context.User.IsInRole("ADMIN");
+        Console.WriteLine(isAdmin);
+        if (userId == user.id || isAdmin)
         {
             context.Succeed(requirement);
         }
