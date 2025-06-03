@@ -1,9 +1,8 @@
 using MyApi.Models.Enums;
 namespace MyApi.Dto
 {
-    public class TodosFilterDto
+    public class TodosFilterDto : BaseData
     {
-        public int? userId { get; set; }
         public int? categoryId { get; set; }
         public string? title { get; set; }
         public string? description { get; set; }

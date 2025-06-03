@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using MyApi.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Mysqlx.Crud;
+using System.Security.Claims;
 namespace MyApi.Controllers
 {
     [ApiController]
@@ -83,6 +84,7 @@ namespace MyApi.Controllers
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<IEnumerable<TagDto>>> GetAllTagsByUserId(int id)
         {
+
             var user = await _userService.GetUserByIdAsync(id);
             if (user == null)
             {

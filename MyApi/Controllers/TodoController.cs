@@ -45,6 +45,7 @@ namespace MyApi.Controllers
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<TodoDto>> CreateTodo([FromBody] TodoDto todoDto)
         {
+            Console.WriteLine(todoDto.userId);
             var result = await _authorizationService.AuthorizeAsync(User, todoDto, "EditPolicy");
             if (!result.Succeeded)
             {

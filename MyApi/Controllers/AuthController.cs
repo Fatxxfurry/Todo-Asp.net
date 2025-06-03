@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using MyApi.Dto;
 using MyApi.Service;
+using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
 
 [ApiController]
@@ -96,7 +97,7 @@ public class AuthController : ControllerBase
             });
         }
     }
-    
+
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto request)
     {
@@ -126,6 +127,29 @@ public class AuthController : ControllerBase
                 user = user
             };
             return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new
+            {
+                message = ex.Message
+            });
+        }
+    }
+
+
+    [HttpGet("profile")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
+    public async Task<IActionResult> Profile()
+    {
+        try
+        {
+            var user = await _userService.GetByEmailAsync(User.Identity.Name);
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+            return Ok(user);
         }
         catch (Exception ex)
         {

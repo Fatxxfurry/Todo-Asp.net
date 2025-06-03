@@ -1,6 +1,6 @@
 namespace MyApi.Dto
 {
-    public class TagDto
+    public class TagDto: BaseData
     {
         public int? id { get; set; }
         public string? name { get; set; }
