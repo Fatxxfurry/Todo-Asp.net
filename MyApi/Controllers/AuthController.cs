@@ -56,7 +56,7 @@ public class AuthController : ControllerBase
 
         await _userService.ForgotPasswordAsync(request.Email, request.NewPassword);
         var token = _jwtService.GenerateToken(user.email, user.id.Value, user.role.ToString());
-        
+
         return Ok(token);
     }
 }
