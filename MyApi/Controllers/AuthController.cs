@@ -26,37 +26,113 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
     {
-        var user = await _userService.LoginAsync(request.email, request.password);
-        if (user != null)
+        try
         {
-            var token = _jwtService.GenerateToken(user.email, user.id.Value, user.role.ToString());
-            return Ok(token);
+            var user = await _userService.LoginAsync(request.email, request.password);
+            if (user != null)
+            {
+                var token = _jwtService.GenerateToken(user.email, user.id.Value, user.role.ToString());
+                var response = new
+                {
+                    token = token,
+                    user = user
+                };
+                return Ok(response);
+            }
+            else return BadRequest("Invalid email or password.");
         }
-        return Unauthorized();
+        catch (Exception ex)
+        {
+            return BadRequest(new
+            {
+                message = ex.Message
+            });
+        }
     }
 
+
+    [HttpPost("sign-up")]
+    public async Task<IActionResult> SignUp([FromBody] SignUpRequestDto request)
+    {
+        try
+        {
+            var storedCode = await _redisCacheService.GetAsync($"verify:{request.Email}");
+
+            if (storedCode == null || storedCode != request.Code)
+                return BadRequest(new
+                {
+                    message = "Mã xác minh không tồn tại hoặc đã hết hạn."
+                });
+            await _redisCacheService.DeleteAsync($"verify:{request.Email}");
+            if (storedCode != request.Code)
+                return BadRequest(new
+                {
+                    message = "Mã xác minh không đúng."
+                });
+            var userDto = new UserDto
+            {
+                email = request.Email,
+                password = request.Password,
+                userName = request.Name
+            };
+            var user = await _userService.RegisterAsync(userDto);
+            if (user != null)
+            {
+                var token = _jwtService.GenerateToken(user.email, user.id.Value, user.role.ToString());
+                var response = new
+                {
+                    token = token,
+                    user = user
+                };
+                return Ok(response);
+            }
+            else return BadRequest("Invalid request.");
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new
+            {
+                message = ex.Message
+            });
+        }
+    }
+    
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto request)
     {
-        var user = await _userService.GetByEmailAsync(request.Email);
-
-        if (user == null)
+        try
         {
-            return BadRequest("Email not found.");
+            var user = await _userService.GetByEmailAsync(request.Email);
+
+            if (user == null)
+            {
+                return BadRequest("Email not found.");
+            }
+            var storedCode = await _redisCacheService.GetAsync($"verify:{request.Email}");
+
+            if (storedCode == null)
+                return BadRequest("Mã xác minh không tồn tại hoặc đã hết hạn.");
+
+            if (storedCode != request.Code)
+                return BadRequest("Mã xác minh không đúng.");
+
+            await _redisCacheService.DeleteAsync($"verify:{request.Email}");
+
+            user = await _userService.ForgotPasswordAsync(request.Email, request.NewPassword);
+            var token = _jwtService.GenerateToken(user.email, user.id.Value, user.role.ToString());
+            var response = new
+            {
+                token = token,
+                user = user
+            };
+            return Ok(response);
         }
-        var storedCode = await _redisCacheService.GetAsync($"verify:{request.Email}");
-
-        if (storedCode == null)
-            return BadRequest("Mã xác minh không tồn tại hoặc đã hết hạn.");
-
-        if (storedCode != request.Code)
-            return BadRequest("Mã xác minh không đúng.");
-
-        await _redisCacheService.DeleteAsync($"verify:{request.Email}");
-
-        await _userService.ForgotPasswordAsync(request.Email, request.NewPassword);
-        var token = _jwtService.GenerateToken(user.email, user.id.Value, user.role.ToString());
-
-        return Ok(token);
+        catch (Exception ex)
+        {
+            return BadRequest(new
+            {
+                message = ex.Message
+            });
+        }
     }
 }

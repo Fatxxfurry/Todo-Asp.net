@@ -1,4 +1,5 @@
 using MyApi.Models;
+using MyApi.Models.Enums;
 using MyApi.Dto;
 using MyApi.Repositories;
 using AutoMapper;
@@ -37,6 +38,11 @@ namespace MyApi.Service.Impl
 
         public async Task<UserDto> RegisterAsync(UserDto userDto)
         {
+            var existUser = await _userRepository.GetByEmailAsync(userDto.email);
+            if (existUser != null)
+            {
+                throw new InvalidOperationException("User already exists.");
+            }
             var user = _mapper.Map<User>(userDto);
             user.createdAt = DateTime.Now;
             user.updatedAt = DateTime.Now;
