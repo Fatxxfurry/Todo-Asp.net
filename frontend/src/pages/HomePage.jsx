@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { Menu, Plus } from "lucide-react";
 import { useUserStore } from "../stores/useUserStore";
 import { useNavigate } from "react-router-dom";
@@ -8,7 +7,7 @@ import Sidebar from "../components/Sidebar";
 import AddTaskModal from "../components/AddTaskModal";
 import TaskList from "../components/TaskList";
 import TaskDetailPopup from "../components/TaskDetailPopup";
-import axios from "axios";
+
 
 const HomePage = () => {
   const [activeSection, setActiveSection] = useState("Today");
@@ -226,7 +225,7 @@ const HomePage = () => {
 
   // Tạo URL hình ảnh hoặc fallback
   const avatarUrl = user?.imgName
-    ? `http://127.0.0.1:5000/images/${user.imgName}`
+    ? `public/avatars/${user.imgName}`
     : null;
   const avatarInitial = user?.userName
     ? user.userName.charAt(0).toUpperCase()
