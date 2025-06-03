@@ -1,70 +1,180 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, Trash, CheckCircle, Menu } from "lucide-react"; // Thêm Menu vào đây
+import { Menu, Plus } from "lucide-react";
 import { useUserStore } from "../stores/useUserStore";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Sidebar from "../components/Sidebar";
+import AddTaskModal from "../components/AddTaskModal";
+import TaskList from "../components/TaskList";
+import TaskDetailPopup from "../components/TaskDetailPopup";
+import axios from "axios";
 
 const HomePage = () => {
-  // State for new task input
-  const [newTask, setNewTask] = useState("");
   const [activeSection, setActiveSection] = useState("Today");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const { user, logout } = useUserStore();
+  const navigate = useNavigate();
 
-  // State for tasks organized by sections
   const [tasks, setTasks] = useState({
     Today: [
-      { id: 1, name: "Add New Task", completed: false },
-      { id: 2, name: "Research content ideas", completed: false },
-      { id: 3, name: "Create a database of guest authors", completed: false },
-      { id: 4, name: "Renew driver's license", completed: false },
+      {
+        id: 1,
+        name: "Add New Task",
+        completed: false,
+        priority: "Low",
+        description: "Create a new task for today",
+        categoryId: 1,
+        tagNames: ["work"],
+        dueDate: "2025-06-04T10:00",
+        status: "Pending",
+      },
+      {
+        id: 2,
+        name: "Research content ideas",
+        completed: false,
+        priority: "Medium",
+        description: "Find new topics for blog",
+        categoryId: 2,
+        tagNames: ["research", "content"],
+        dueDate: "2025-06-04T15:00",
+        status: "Pending",
+      },
+      {
+        id: 3,
+        name: "Create a database of guest authors",
+        completed: false,
+        priority: "High",
+        description: "Compile list of potential authors",
+        categoryId: 1,
+        tagNames: ["database", "authors"],
+        dueDate: "2025-06-05T12:00",
+        status: "Pending",
+      },
+      {
+        id: 4,
+        name: "Renew driver's license",
+        completed: false,
+        priority: "Low",
+        description: "Visit DMV to renew license",
+        categoryId: 3,
+        tagNames: ["personal"],
+        dueDate: "2025-06-06T09:00",
+        status: "Pending",
+      },
     ],
     Tomorrow: [
-      { id: 5, name: "Add New Task", completed: false },
+      {
+        id: 5,
+        name: "Add New Task",
+        completed: false,
+        priority: "Low",
+        description: "Create a new task for tomorrow",
+        categoryId: 1,
+        tagNames: ["work"],
+        dueDate: "2025-06-05T10:00",
+        status: "Pending",
+      },
       {
         id: 6,
         name: "Create job posting for SEO specialist",
         completed: false,
+        priority: "Medium",
+        description: "Write job description for SEO role",
+        categoryId: 2,
+        tagNames: ["hiring", "seo"],
+        dueDate: "2025-06-05T14:00",
+        status: "Pending",
       },
       {
         id: 7,
         name: "Request design assets for landing page",
         completed: false,
+        priority: "High",
+        description: "Coordinate with design team",
+        categoryId: 1,
+        tagNames: ["design", "landing"],
+        dueDate: "2025-06-05T16:00",
+        status: "Pending",
       },
     ],
     "This Week": [
-      { id: 8, name: "Add New Task", completed: false },
-      { id: 9, name: "Research content ideas", completed: false },
-      { id: 10, name: "Create a database of guest authors", completed: false },
-      { id: 11, name: "Renew driver's license", completed: false },
-      { id: 12, name: "Consult accountant", completed: false },
-      { id: 13, name: "Print business card", completed: false },
+      {
+        id: 8,
+        name: "Add New Task",
+        completed: false,
+        priority: "Low",
+        description: "Create a new task for this week",
+        categoryId: 1,
+        tagNames: ["work"],
+        dueDate: "2025-06-07T10:00",
+        status: "Pending",
+      },
+      {
+        id: 9,
+        name: "Research content ideas",
+        completed: false,
+        priority: "Medium",
+        description: "Explore new content strategies",
+        categoryId: 2,
+        tagNames: ["research", "content"],
+        dueDate: "2025-06-08T15:00",
+        status: "Pending",
+      },
+      {
+        id: 10,
+        name: "Create a database of guest authors",
+        completed: false,
+        priority: "High",
+        description: "Update author database",
+        categoryId: 1,
+        tagNames: ["database", "authors"],
+        dueDate: "2025-06-09T12:00",
+        status: "Pending",
+      },
+      {
+        id: 11,
+        name: "Renew driver's license",
+        completed: false,
+        priority: "Low",
+        description: "Complete license renewal process",
+        categoryId: 3,
+        tagNames: ["personal"],
+        dueDate: "2025-06-10T09:00",
+        status: "Pending",
+      },
+      {
+        id: 12,
+        name: "Consult accountant",
+        completed: false,
+        priority: "Medium",
+        description: "Discuss tax planning",
+        categoryId: 3,
+        tagNames: ["finance"],
+        dueDate: "2025-06-11T11:00",
+        status: "Pending",
+      },
+      {
+        id: 13,
+        name: "Print business card",
+        completed: false,
+        priority: "Low",
+        description: "Order new business cards",
+        categoryId: 1,
+        tagNames: ["branding"],
+        dueDate: "2025-06-12T13:00",
+        status: "Pending",
+      },
     ],
   });
 
-  const { user } = useUserStore();
-
-  // Handle adding a new task
-  const handleAddTask = (e) => {
-    e.preventDefault();
-    if (!newTask.trim()) {
-      toast.error("Please enter a task!");
-      return;
-    }
-    const task = {
-      id: Date.now(),
-      name: newTask,
-      completed: false,
-    };
-    setTasks({
-      ...tasks,
-      [activeSection]: [...tasks[activeSection], task],
-    });
-    setNewTask("");
-    toast.success("Task added successfully!");
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
   };
 
-  // Handle toggling task completion
   const toggleTaskCompletion = (taskId, section) => {
     setTasks({
       ...tasks,
@@ -74,7 +184,6 @@ const HomePage = () => {
     });
   };
 
-  // Handle deleting a task
   const handleDeleteTask = (taskId, section) => {
     setTasks({
       ...tasks,
@@ -82,6 +191,46 @@ const HomePage = () => {
     });
     toast.success("Task deleted!");
   };
+
+  const handleTaskCreated = (newTaskData) => {
+    const task = {
+      id: newTaskData.id || Date.now(),
+      name: newTaskData.title,
+      completed: false,
+      priority: newTaskData.priority,
+      description: newTaskData.description,
+      categoryId: newTaskData.categoryId,
+      tagNames: newTaskData.tagNames,
+      dueDate: newTaskData.dueDate,
+      status: newTaskData.status || "Pending",
+    };
+    setTasks({
+      ...tasks,
+      [activeSection]: [...tasks[activeSection], task],
+    });
+    toast.success("Task created via modal!");
+    setIsModalOpen(false);
+  };
+
+  const handleTaskClick = (task) => {
+    setSelectedTask(task);
+  };
+
+  const closeTaskDetail = () => {
+    setSelectedTask(null);
+  };
+
+  const handleAvatarClick = () => {
+    navigate("/user-profile");
+  };
+
+  // Tạo URL hình ảnh hoặc fallback
+  const avatarUrl = user?.imgName
+    ? `http://127.0.0.1:5000/images/${user.imgName}`
+    : null;
+  const avatarInitial = user?.userName
+    ? user.userName.charAt(0).toUpperCase()
+    : "?";
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
@@ -105,14 +254,41 @@ const HomePage = () => {
               <Menu className="h-6 w-6" />
             </button>
             <h1 className="text-xl font-bold text-gray-900">Upcoming</h1>
-            <div className="w-6"></div> {/* Spacer for alignment */}
+            <button
+              onClick={handleAvatarClick}
+              className="flex items-center justify-center w-8 h-8 rounded-full overflow-hidden bg-emerald-600 text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            >
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="User avatar"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span>{avatarInitial}</span>
+              )}
+            </button>
           </div>
         </div>
 
         {/* Desktop Header */}
         <div className="bg-white shadow hidden sm:block">
-          <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 flex items-center justify-between">
             <h1 className="text-3xl font-bold text-gray-900">Upcoming</h1>
+            <button
+              onClick={handleAvatarClick}
+              className="flex items-center justify-center w-10 h-10 rounded-full overflow-hidden bg-emerald-600 text-white text-base font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            >
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="User avatar"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span>{avatarInitial}</span>
+              )}
+            </button>
           </div>
         </div>
 
@@ -135,91 +311,45 @@ const HomePage = () => {
             ))}
           </div>
 
-          {/* Add Task Form */}
+          {/* Add New Task Button */}
           <div className="mb-8">
-            <form onSubmit={handleAddTask} className="flex gap-2">
-              <div className="flex-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Plus className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  value={newTask}
-                  onChange={(e) => setNewTask(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm"
-                  placeholder="Add New Task"
-                />
-              </div>
-              <button
-                type="submit"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
-              >
-                Add
-              </button>
-            </form>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              Add New Task
+            </button>
           </div>
 
-          {/* Tasks List */}
-          <div className="space-y-8">
-            {Object.entries(tasks).map(([section, sectionTasks]) => (
-              <motion.div
-                key={section}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className={`bg-white shadow overflow-hidden rounded-lg ${
-                  activeSection !== section ? "hidden" : ""
-                }`}
-              >
-                <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900">
-                    {section}
-                  </h3>
-                </div>
-                <ul className="divide-y divide-gray-200">
-                  {sectionTasks.length === 0 ? (
-                    <li className="px-4 py-4 text-center text-gray-500">
-                      No tasks yet
-                    </li>
-                  ) : (
-                    sectionTasks.map((task) => (
-                      <li key={task.id} className="px-4 py-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <input
-                              type="checkbox"
-                              checked={task.completed}
-                              onChange={() =>
-                                toggleTaskCompletion(task.id, section)
-                              }
-                              className="h-5 w-5 text-emerald-600 rounded focus:ring-emerald-500 border-gray-300"
-                            />
-                            <span
-                              className={`ml-3 text-sm ${
-                                task.completed
-                                  ? "line-through text-gray-400"
-                                  : "text-gray-700"
-                              }`}
-                            >
-                              {task.name}
-                            </span>
-                          </div>
-                          <button
-                            onClick={() => handleDeleteTask(task.id, section)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <Trash className="h-5 w-5" />
-                          </button>
-                        </div>
-                      </li>
-                    ))
-                  )}
-                </ul>
-              </motion.div>
-            ))}
-          </div>
+          {/* Task List */}
+          <TaskList
+            tasks={tasks[activeSection]}
+            section={activeSection}
+            toggleTaskCompletion={toggleTaskCompletion}
+            handleDeleteTask={handleDeleteTask}
+            onTaskClick={handleTaskClick}
+          />
         </div>
       </div>
+
+      {/* Add Task Modal */}
+      {isModalOpen && (
+        <AddTaskModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onTaskCreated={handleTaskCreated}
+        />
+      )}
+
+      {/* Task Detail Popup */}
+      {selectedTask && (
+        <TaskDetailPopup
+          task={selectedTask}
+          isOpen={!!selectedTask}
+          onClose={closeTaskDetail}
+        />
+      )}
     </div>
   );
 };

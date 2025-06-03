@@ -3,6 +3,7 @@ import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import AdminPage from "./pages/AdminPage";
+import UserProfile from "./pages/UserProfile";
 import { Toaster } from "react-hot-toast";
 import { useEffect } from "react";
 import LoadingSpinner from "./components/LoadingSpinner";
@@ -34,6 +35,10 @@ function App() {
           <Route
             path="/signup"
             element={!user ? <SignUpPage /> : <Navigate to="/" replace />}
+          />
+          <Route
+            path="/user-profile"
+            element={user ? <UserProfile /> : <Navigate to="/login" replace />}
           />
           <Route
             path="*"
