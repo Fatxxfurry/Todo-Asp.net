@@ -45,12 +45,22 @@ namespace MyApi.Controllers
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<CategoryDto>> CreateCategory([FromBody] CategoryDto categoryDto)
         {
-            var result = await _authorizationService.AuthorizeAsync(User, categoryDto, "EditPolicy");
-            if (!result.Succeeded)
+            try
             {
-                return Forbid();
+                var result = await _authorizationService.AuthorizeAsync(User, categoryDto, "EditPolicy");
+                if (!result.Succeeded)
+                {
+                    return Forbid();
+                }
+                return Ok(await _categoryService.CreateCategoryAsync(categoryDto));
             }
-            return Ok(await _categoryService.CreateCategoryAsync(categoryDto));
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
+            }
         }
 
         [HttpPut("{id}")]
@@ -82,5 +92,6 @@ namespace MyApi.Controllers
             await _categoryService.DeleteCategoryAsync(id);
             return NoContent();
         }
+
     }
 }

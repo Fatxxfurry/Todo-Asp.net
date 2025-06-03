@@ -47,12 +47,19 @@ namespace MyApi.Controllers
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<TagDto>> CreateTag([FromBody] TagDto tagDto)
         {
-            var result = await _authorizationService.AuthorizeAsync(User, tagDto, "EditPolicy");
-            if (!result.Succeeded)
+            try
             {
-                return Forbid();
+                var result = await _authorizationService.AuthorizeAsync(User, tagDto, "EditPolicy");
+                if (!result.Succeeded)
+                {
+                    return Forbid();
+                }
+                return Ok(await _tagService.CreateTagAsync(tagDto));
             }
-            return Ok(await _tagService.CreateTagAsync(tagDto));
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut("{id}")]

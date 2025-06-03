@@ -9,5 +9,6 @@ namespace MyApi.Repositories
         Task<Category> CreateAsync(Category category);
         Task<Category> UpdateAsync(Category category);
         Task DeleteAsync(int id);
+        Task<Category?> GetByNameAsync(string name);
     }
 }

@@ -16,5 +16,10 @@ namespace MyApi.Service
         Task<IEnumerable<TagDto>> GetAllTagsByUserIdAsync(int id);
         Task<UserDto> UpdateUserAvatarAsync(int id, IFormFile file);
         Task<UserDto> ForgotPasswordAsync(string email, string password);
+        Task<int> GetTodoCountByUserIdAsync(int id);
+        Task<int> GetCategoryCountByUserIdAsync(int id);
+        Task<int> GetTagCountByUserIdAsync(int id);
+        Task<UserAnalyticsDto> GetUserAnalyticsAsync(int id); 
+        Task<IEnumerable<UserAnalyticsDto>> GetAllUserAnalyticsAsync();
     }
 }

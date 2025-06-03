@@ -60,7 +60,11 @@ namespace MyApi.Controllers
             {
                 return Forbid();
             }
-            return Ok(await _userService.GetAllCategoriesByUserIdAsync(id));
+            var data = await _userService.GetAllCategoriesByUserIdAsync(id);
+            return Ok(new
+            {
+                data
+            });
         }
 
         [HttpGet("{id}/todos")]
@@ -77,7 +81,8 @@ namespace MyApi.Controllers
             {
                 return Forbid();
             }
-            return Ok(await _userService.GetAllTodosByUserIdAsync(id));
+            var todos = await _userService.GetAllTodosByUserIdAsync(id);
+            return Ok(new { todos });
         }
 
         [HttpGet("{id}/tags")]
@@ -95,7 +100,11 @@ namespace MyApi.Controllers
             {
                 return Forbid();
             }
-            return Ok(await _userService.GetAllTagsByUserIdAsync(id));
+            var data = await _userService.GetAllTagsByUserIdAsync(id);
+            return Ok(new
+            {
+                data
+            });
         }
 
         [HttpPost]

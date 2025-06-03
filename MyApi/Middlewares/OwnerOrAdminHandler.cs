@@ -9,7 +9,6 @@ public class OwnerOrAdminHandler<T> : AuthorizationHandler<OwnerOrAdminRequireme
     {
         var userId = int.Parse(context.User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier).Value);
         var isAdmin = context.User.IsInRole("ADMIN");
-        Console.WriteLine($"userId: {entity.userId}, isAdmin: {isAdmin}");
         if (userId == entity.userId || isAdmin)
         {
             context.Succeed(requirement);

@@ -162,5 +162,77 @@ namespace MyApi.Service.Impl
             var updatedUser = await _userRepository.UpdateUserAsync(user);
             return _mapper.Map<UserDto>(updatedUser);
         }
+        public async Task<int> GetTodoCountByUserIdAsync(int id)
+        {
+            return await _userRepository.GetTodoCountByUserIdAsync(id);
+        }
+        public async Task<int> GetCategoryCountByUserIdAsync(int id)
+        {
+            return await _userRepository.GetCategoryCountByUserIdAsync(id);
+        }
+        public async Task<int> GetTagCountByUserIdAsync(int id)
+        {
+            return await _userRepository.GetTagCountByUserIdAsync(id);
+        }
+        public async Task<UserAnalyticsDto> GetUserAnalyticsAsync(int id)
+        {
+            var user = await _userRepository.GetByIdAsync(id);
+            if (user == null)
+            {
+                throw new NotFoundException("User not found.");
+            }
+            var todoCount = await _userRepository.GetTodoCountByUserIdAsync(id);
+            var categoryCount = await _userRepository.GetCategoryCountByUserIdAsync(id);
+            var tagCount = await _userRepository.GetTagCountByUserIdAsync(id);
+            var userAnalytics = new UserAnalyticsDto
+            {
+                id = user.id,
+                userName = user.userName,
+                password = user.password,
+                email = user.email,
+                role = user.role,
+                imgName = user.imgName,
+                createdAt = user.createdAt,
+                updatedAt = user.updatedAt,
+                amountTag = tagCount,
+                amountCategory = categoryCount,
+                amountTodo = todoCount
+            };
+            return userAnalytics;
+        }
+        public async Task<IEnumerable<UserAnalyticsDto>> GetAllUserAnalyticsAsync()
+        {
+            var users = await _userRepository.GetAllAsync();
+            var userAnalyticsList = new List<UserAnalyticsDto>();
+
+            foreach (var user in users)
+            {
+                var todoCount = await _userRepository.GetTodoCountByUserIdAsync(user.id);
+                var categoryCount = await _userRepository.GetCategoryCountByUserIdAsync(user.id);
+                var tagCount = await _userRepository.GetTagCountByUserIdAsync(user.id);
+
+                var userAnalytics = new UserAnalyticsDto
+                {
+                    id = user.id,
+                    userName = user.userName,
+                    password = user.password,
+                    email = user.email,
+                    role = user.role,
+                    imgName = user.imgName,
+                    createdAt = user.createdAt,
+                    updatedAt = user.updatedAt,
+                    amountTag = tagCount,
+                    amountCategory = categoryCount,
+                    amountTodo = todoCount
+                };
+
+                userAnalyticsList.Add(userAnalytics);
+            }
+
+            return userAnalyticsList;
+        }
+
     }
 }
+
+

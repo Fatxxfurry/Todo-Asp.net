@@ -16,7 +16,7 @@ export const useUserStore = create((set, get) => ({
         Password: password,
         Code: code,
       });
-      set({ user: res.data, loading: false });
+      set({ user: res.data.user, loading: false });
       localStorage.setItem("token", res.data.token);
     } catch (error) {
       set({ loading: false });
@@ -30,7 +30,7 @@ export const useUserStore = create((set, get) => ({
         Email: email,
         Password: password,
       });
-      set({ user: res.data, loading: false });
+      set({ user: res.data.user, loading: false });
       localStorage.setItem("token", res.data.token);
     } catch (error) {
       set({ loading: false });
@@ -66,7 +66,7 @@ export const useUserStore = create((set, get) => ({
         Email: email,
         Password: password,
       });
-      set({ user: res.data, loading: false });
+      set({ user: res.data.user, loading: false });
       localStorage.setItem("token", res.data.token);
     } catch (error) {
       set({ loading: false });

@@ -48,6 +48,10 @@ namespace MyApi.Repositories.Implementations
         {
             return await _context.Categories.Where(c => c.userId == userId).ToListAsync();
         }
+        public async Task<Category?> GetByNameAsync(string name)
+        {
+            return await _context.Categories.FirstOrDefaultAsync(c => c.name == name);
+        }
     }
 }
 

@@ -9,10 +9,14 @@ namespace MyApi.Controllers
     public class TodoController : ControllerBase
     {
         private readonly ITodoService _todoService;
+        private readonly IUserService _userService;
+        private readonly ICategoryService _categoryService;
         private readonly IAuthorizationService _authorizationService;
 
-        public TodoController(ITodoService todoService, IAuthorizationService authorizationService)
+        public TodoController(ITodoService todoService, IAuthorizationService authorizationService, IUserService userService, ICategoryService categoryService)
         {
+            _categoryService = categoryService;
+            _userService = userService;
             _authorizationService = authorizationService;
             _todoService = todoService;
         }
@@ -45,7 +49,6 @@ namespace MyApi.Controllers
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<TodoDto>> CreateTodo([FromBody] TodoDto todoDto)
         {
-            Console.WriteLine(todoDto.userId);
             var result = await _authorizationService.AuthorizeAsync(User, todoDto, "EditPolicy");
             if (!result.Succeeded)
             {
@@ -82,6 +85,41 @@ namespace MyApi.Controllers
             }
             await _todoService.DeleteTodoByIdAsync(id);
             return NoContent();
+        }
+        [HttpGet("user/{userId}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<ActionResult<IEnumerable<TodoDto>>> GetTodosByUserId(int userId)
+        {
+            var user = await _userService.GetUserByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            var result = await _authorizationService.AuthorizeAsync(User, user, "UserPolicy");
+            if (!result.Succeeded)
+            {
+                return Forbid();
+            }
+            return Ok(await _todoService.GetTodosByUserIdAsync(userId)
+            );
+        }
+        [HttpGet("category/{categoryId}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<ActionResult<IEnumerable<TodoDto>>> GetTodosByCategoryId(int categoryId)
+        {
+            var category = await _categoryService.GetCategoryByIdAsync(categoryId);
+            if (category == null)
+            {
+                return NotFound();
+            }
+            var result = await _authorizationService.AuthorizeAsync(User, category, "EditPolicy");
+            if (!result.Succeeded)
+            {
+                return Forbid();
+            }
+            return Ok(
+await _todoService.GetTodosByCategoryIdAsync(categoryId)
+            );
         }
     }
 }

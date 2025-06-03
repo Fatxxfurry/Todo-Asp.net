@@ -34,6 +34,11 @@ namespace MyApi.Service.Impl
 
         public async Task<CategoryDto> CreateCategoryAsync(CategoryDto categoryDto)
         {
+            var existingCategory = await _categoryRepository.GetByNameAsync(categoryDto.name);
+            if (existingCategory != null)
+            {
+                throw new Exception("Category already exists.");
+            }
             var category = _mapper.Map<Category>(categoryDto);
             category.createdAt = DateTime.UtcNow;
             category.updatedAt = DateTime.UtcNow;

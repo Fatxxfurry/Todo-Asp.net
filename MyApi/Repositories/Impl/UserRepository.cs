@@ -60,5 +60,20 @@ namespace MyApi.Repositories.Implementations
         {
             return await _context.Users.ToListAsync();
         }
+
+        public async Task<int> GetTodoCountByUserIdAsync(int userId)
+        {
+            return await _context.Todos.CountAsync(t => t.userId == userId);
+        }
+
+        public async Task<int> GetCategoryCountByUserIdAsync(int userId)
+        {
+            return await _context.Categories.CountAsync(c => c.userId == userId);
+        }
+
+        public async Task<int> GetTagCountByUserIdAsync(int userId)
+        {
+            return await _context.Tags.CountAsync(t => t.userId == userId);
+        }
     }
 }

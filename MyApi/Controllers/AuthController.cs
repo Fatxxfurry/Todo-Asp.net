@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using MyApi.Dto;
 using MyApi.Service;
 using Microsoft.AspNetCore.Authorization;
-using System.Threading.Tasks;
+
 
 [ApiController]
 [Route("api/[controller]")]
