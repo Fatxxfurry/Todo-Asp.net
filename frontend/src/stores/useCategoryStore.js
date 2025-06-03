@@ -7,9 +7,10 @@ export const useCategoryStore = create((set) => ({
   loading: false,
 
   fetchUserCategories: async (userId) => {
+    const categories = [];
     set({ loading: true });
     try {
-      const response = await axios.get(`/${userId}/categories`);
+      const response = await axios.get(`/user/${userId}/categories`);
       set({ categories: response.data, loading: false });
     } catch (error) {
       toast.error("Failed to fetch categories");

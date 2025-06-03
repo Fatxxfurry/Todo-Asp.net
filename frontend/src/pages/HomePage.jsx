@@ -8,7 +8,6 @@ import AddTaskModal from "../components/AddTaskModal";
 import TaskList from "../components/TaskList";
 import TaskDetailPopup from "../components/TaskDetailPopup";
 
-
 const HomePage = () => {
   const [activeSection, setActiveSection] = useState("Today");
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -224,9 +223,7 @@ const HomePage = () => {
   };
 
   // Tạo URL hình ảnh hoặc fallback
-  const avatarUrl = user?.imgName
-    ? `public/avatars/${user.imgName}`
-    : null;
+  const avatarUrl = user?.imgName ? `public/avatars/${user.imgName}` : null;
   const avatarInitial = user?.userName
     ? user.userName.charAt(0).toUpperCase()
     : "?";

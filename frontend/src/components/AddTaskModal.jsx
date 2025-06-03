@@ -5,9 +5,15 @@ import { X, Tag, Calendar, Flag, FileText, List } from "lucide-react";
 import { toast } from "react-hot-toast";
 import axios from "axios";
 import { useUserStore } from "../stores/useUserStore";
+import { useCategoryStore } from "../stores/useCategoryStore";
+import { useTagStore } from "../stores/useTagStore";
+import { useTodoStore } from "../stores/useTodoStore";
 
 const AddTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
   const { user } = useUserStore();
+  const { categories, fetchUserCategories } = useCategoryStore();
+  const { tags, fetchTagsByUserId } = useTagStore();
+  const { addTodo } = useTodoStore();
   const {
     register,
     handleSubmit,
@@ -26,20 +32,10 @@ const AddTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
       dueDate: "",
     },
   });
-  const [categories, setCategories] = useState([]);
   const [newTag, setNewTag] = useState("");
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get("/api/categories");
-        setCategories(response.data);
-      } catch (error) {
-        console.error("Failed to fetch categories:", error);
-        toast.error("Failed to load categories");
-      }
-    };
-    fetchCategories();
+    fetchUserCategories(user.id);
   }, []);
 
   const handleAddTag = () => {
@@ -61,13 +57,14 @@ const AddTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
   const onSubmit = async (data) => {
     try {
       const todoData = {
-        ...data,
-        userId: user.id,
-        status: "Pending",
+        title: data.title,
+        description: data.description,
+        priority: data.priority,
+        categoryId: data.categoryId,
+        userId: user.id
       };
-      const response = await axios.post("/api/todos", todoData);
+      const response = await addTodo(todoData);
       toast.success("Task created successfully!");
-      onTaskCreated(response.data);
       reset();
       onClose();
     } catch (error) {

@@ -2,7 +2,7 @@ import { create } from "zustand";
 import axios from "../lib/axios";
 import { toast } from "react-hot-toast";
 
-export const useCartStore = create((set, get) => ({
+export const useTodoStore = create((set, get) => ({
   todos: [],
   fetchUserTodos: async (userId) => {
     set({ loading: true });
@@ -25,6 +25,20 @@ export const useCartStore = create((set, get) => ({
       toast.success("Todo deleted successfully!");
     } catch (error) {
       toast.error("Failed to delete todo");
+      set({ loading: false });
+    }
+  },
+  addTodo: async (payload) => {
+    set({ loading: true });
+    try {
+      const response = await axios.post("/todo", payload);
+      set((state) => ({
+        todos: [...state.todos, response.data],
+        loading: false,
+      }));
+      toast.success("Todo added successfully!");
+    } catch (error) {
+      toast.error("Failed to add todo");
       set({ loading: false });
     }
   },
