@@ -2,7 +2,7 @@ import { create } from "zustand";
 import axios from "../lib/axios";
 import { toast } from "react-hot-toast";
 
-export const useAnalyistStore = create((set, get) => ({
+export const useAnalyticsStore = create((set, get) => ({
   users: [],
   todoCount: 0,
   categoryCount: 0,
@@ -15,7 +15,7 @@ export const useAnalyistStore = create((set, get) => ({
     try {
       const response = await axios.get("/analytics");
       set({
-        users: response.data.users,
+        users: [...response.data.users],
         todoCount: response.data.todoCount,
         categoryCount: response.data.categoryCount,
         tagCount: response.data.tagCount,
@@ -26,4 +26,8 @@ export const useAnalyistStore = create((set, get) => ({
       toast.error("Failed to fetch analytics");
     }
   },
+  removeUserById: (userId) =>
+    set((state) => ({
+      users: state.users.filter((user) => user.id !== userId),
+    })),
 }));

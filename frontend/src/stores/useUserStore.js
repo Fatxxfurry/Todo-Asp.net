@@ -52,7 +52,6 @@ export const useUserStore = create((set, get) => ({
     checkAuth: async () => {
       set({ checkingAuth: true });
       try {
-        alert("checkAuth");
         const response = await axios.get("/auth/profile");
         set({ user: response.data, checkingAuth: false });
       } catch (error) {
@@ -71,6 +70,13 @@ export const useUserStore = create((set, get) => ({
       localStorage.setItem("token", res.data.token);
     } catch (error) {
       set({ loading: false });
+      toast.error(error.response.data.message || "An error occurred");
+    }
+  },
+  deleteUserById: async (id) => {
+    try {
+      await axios.delete("/user/" + id);
+    } catch (error) {
       toast.error(error.response.data.message || "An error occurred");
     }
   },

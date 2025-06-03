@@ -1,55 +1,19 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import {
-  LogIn,
-  Mail,
-  Lock,
-  ArrowRight,
-  Loader,
-  ShieldCheck,
-} from "lucide-react";
+import { LogIn, Mail, Lock, Loader, ArrowRight } from "lucide-react";
 import { useUserStore } from "../stores/useUserStore";
-import toast from "react-hot-toast";
+
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [verificationCode, setVerificationCode] = useState("");
-  const [sentCode, setSentCode] = useState(false);
-  const [generatedCode, setGeneratedCode] = useState(null);
-  const [sendingCode, setSendingCode] = useState(false);
 
   const { login, loading } = useUserStore();
 
-  // Simulate sending verification code
-  const handleSendCode = async () => {
-    if (!email) {
-      toast.error("Please enter an email!");
-      return;
-    }
-    setSendingCode(true);
-    try {
-      // giả lap tao ma
-      const code = Math.floor(100000 + Math.random() * 900000).toString();
-      setGeneratedCode(code);
-      setSentCode(true);
-      console.log(`Verification code (simulated): ${code}`); // Log code for debugging
-      toast.success("Verification code sent to your email!");
-    } catch (error) {
-      toast.error("Failed to send verification code!");
-    } finally {
-      setSendingCode(false);
-    }
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (sentCode && verificationCode !== generatedCode) {
-      toast.error("Invalid verification code!");
-      return;
-    }
-    console.log(email, password, verificationCode);
+    console.log(email, password);
     login(email, password);
   };
 
@@ -97,61 +61,7 @@ const LoginPage = () => {
                   placeholder="user@example.com"
                 />
               </div>
-              <button
-                type="button"
-                onClick={handleSendCode}
-                disabled={sendingCode || sentCode}
-                className="mt-2 w-full flex justify-center py-2 px-4 border border-transparent 
-                  rounded-md shadow-sm text-sm font-medium text-white bg-blue-600
-                  hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2
-                  focus:ring-blue-500 transition duration-150 ease-in-out disabled:opacity-50"
-              >
-                {sendingCode ? (
-                  <>
-                    <Loader
-                      className="mr-2 h-5 w-5 animate-spin"
-                      aria-hidden="true"
-                    />
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <Mail className="mr-2 h-5 w-5" aria-hidden="true" />
-                    {sentCode ? "Code Sent" : "Send Verification Code"}
-                  </>
-                )}
-              </button>
             </div>
-
-            {sentCode && (
-              <div>
-                <label
-                  htmlFor="verificationCode"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Verification Code
-                </label>
-                <div className="mt-1 relative rounded-md shadow-sm">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <ShieldCheck
-                      className="h-5 w-5 text-gray-500"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <input
-                    id="verificationCode"
-                    type="text"
-                    required
-                    value={verificationCode}
-                    onChange={(e) => setVerificationCode(e.target.value)}
-                    className="block w-full px-3 py-2 pl-10 bg-gray-50 border border-gray-200 
-                      rounded-md shadow-sm placeholder-gray-500 focus:outline-none focus:ring-emerald-500 
-                      focus:border-emerald-500 sm:text-sm"
-                    placeholder="Enter verification code"
-                  />
-                </div>
-              </div>
-            )}
 
             <div>
               <label
@@ -184,7 +94,7 @@ const LoginPage = () => {
                 rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600
                 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2
                 focus:ring-emerald-500 transition duration-150 ease-in-out disabled:opacity-50"
-              disabled={loading || (sentCode && !verificationCode)}
+              disabled={loading}
             >
               {loading ? (
                 <>
@@ -219,3 +129,4 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+
