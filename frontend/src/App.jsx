@@ -44,7 +44,16 @@ function App() {
             path="*"
             element={user ? <HomePage /> : <Navigate to="/login" replace />}
           />
-          <Route path="/admin" element={<AdminPage />} />
+          <Route
+            path="/admin"
+            element={
+              user && user.role === "ADMIN" ? (
+                <AdminPage />
+              ) : (
+                <Navigate to="/" replace />
+              )
+            }
+          />
         </Routes>
       </div>
       <Toaster />
